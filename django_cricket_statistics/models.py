@@ -9,8 +9,8 @@ from django.urls import reverse
 BALLS_PER_OVER = 6
 
 
-class CricketModelMixin(models.Model):
-    """Mixin class for all models to be stored in the db."""
+class CricketModelBase(models.Model):
+    """Base class for all models to be stored in the db."""
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -19,7 +19,7 @@ class CricketModelMixin(models.Model):
         abstract = True
 
 
-class Player(CricketModelMixin):
+class Player(CricketModelBase):
     """Class representing a single player."""
 
     first_name = models.CharField(max_length=200, blank=True)
@@ -69,7 +69,7 @@ class Player(CricketModelMixin):
         return str(self)
 
 
-class Season(CricketModelMixin):
+class Season(CricketModelBase):
     """Class representing a single season."""
 
     year = models.PositiveSmallIntegerField(unique=True)
@@ -95,7 +95,7 @@ class Season(CricketModelMixin):
         return int(self.year) + 1
 
 
-class Grade(CricketModelMixin):
+class Grade(CricketModelBase):
     """Class representing a single grade."""
 
     grade = models.CharField(max_length=50)
@@ -108,7 +108,7 @@ class Grade(CricketModelMixin):
         return str(self.grade)
 
 
-class Statistic(CricketModelMixin):
+class Statistic(CricketModelBase):
     """Class representing a single statistic for a given player/season/grade."""
 
     player = models.ForeignKey(
@@ -189,7 +189,7 @@ class Statistic(CricketModelMixin):
         return f"{self.player.long_name} - {self.season} - {self.grade}"
 
 
-class Hundred(CricketModelMixin):
+class Hundred(CricketModelBase):
     """Class representing a single score of 100."""
 
     statistic = models.ForeignKey(
@@ -214,7 +214,7 @@ class Hundred(CricketModelMixin):
         return self.score
 
 
-class FiveWicketInning(CricketModelMixin):
+class FiveWicketInning(CricketModelBase):
     """Class representing a single five wicket inning."""
 
     statistic = models.ForeignKey(
