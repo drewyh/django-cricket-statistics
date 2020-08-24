@@ -58,20 +58,114 @@ class CareerStatistic(PlayerStatisticView):
     group_by = ("player",)
 
 
-class MostWicketsSeasonView(SeasonStatistic):
+class MatchesCareerView(CareerStatistic):
 
-    ordering = "-wickets"
+    aggregator = Sum("matches")
+    ordering = "-matches_sum"
 
 
-class MostWicketsCareerView(CareerStatistic):
+class BattingRunsCareerView(CareerStatistic):
+
+    aggregator = Sum("batting_runs")
+    ordering = "-batting_runs__sum"
+
+
+class BattingRunsSeasonView(SeasonStatistic):
+
+    ordering = "-batting_runs"
+
+
+class BattingAverageMixin:
+
+    aggregate_function = None
+    aggregator = {
+        batting_outs__sum: BattingAverageMixin.aggregate_function("batting_innings")
+        - BattingAverageMixin.aggregate_function("batting_not_outs"),
+        batting_runs__sum: BattingAverageMixin.aggregate_function("batting_runs"),
+        batting_average: (
+            Case(
+                When(
+                    batting_outs__sum__gt=0,
+                    then=F("batting_runs__sum") / F("batting_outs__sum"),
+                ),
+                default=None,
+            ),
+        ),
+    }
+    ordering = "-batting_average"
+
+
+class BattingAverageCareerView(BattingAverageMixin, CareerStatistic):
+
+    aggregate_function = Sum
+
+
+class BattingAverageCareerView(BattingAverageMixin, CareerStatistic):
+
+    aggregate_function = F
+
+
+# class BestInningsCareer(CareerStatistic):
+#
+#    aggregator = Sum("wickets")
+
+
+# class HundredsCareerView(CareerStatistic):
+#
+#    aggregator = Sum("wickets")
+
+
+# class HundredsSeasonView(CareerStatistic):
+#
+#    aggregator = Sum("wickets")
+
+
+class WicketsCareerView(CareerStatistic):
 
     aggregator = Sum("wickets")
     ordering = "-wickets__sum"
 
 
+class WicketsSeasonView(SeasonStatistic):
+
+    ordering = "-wickets"
+
+
+class BowlingAverageMixin:
+
+    aggregate_function = None
+    aggregator = {
+        bowling_runs__sum: BowlingAverageMixin.aggregate_function("bowling_runs"),
+        bowling_wickets__sum: BowlingAverageMixin.aggregate_function("bowling_wickets"),
+        bowling_average: (
+            Case(
+                When(
+                    bowling_wickets__sum__gt=0,
+                    then=F("bowling_runs__sum") / F("bowling_wickets__sum"),
+                ),
+                default=None,
+            ),
+        ),
+    }
+    ordering = "bowling_average"
+
+
+class BowlingAverageCareerView(BowlingAverageMixin, CareerStatistic):
+
+    aggregate_function = Sum
+
+
+class BowlingAverageSeasonView(BowlingAverageMixin, SeasonStatistic):
+
+    aggregate_function = F
+
+
 class EconomyRateMixin:
 
+    aggregate_function = None
     aggregator = {
+        bowling_balls__sum: EconomyRateMixin.aggregate_function("bowling_balls"),
+        bowling_runs__sum: EconomyRateMixin.aggregate_function("bowling_runs"),
         economy_rate: (
             Case(
                 When(
@@ -82,35 +176,16 @@ class EconomyRateMixin:
                 ),
                 default=None,
             ),
-        )
+        ),
     }
     ordering = "economy_rate"
 
 
-class EconomyRateSeasonView(EconomyRateMixin, SeasonStatistic):
-
-    aggregator = {
-        bowling_balls__sum: F("bowling_balls"),
-        bowling_runs__sum: F("bowling_runs"),
-        **EconomyRateMixin.aggregator,
-    }
-
-
 class EconomyRateCareerView(EconomyRateMixin, CareerStatistic):
 
-    aggregator = {
-        bowling_balls__sum: Sum("bowling_balls"),
-        bowling_runs__sum: Sum("bowling_runs"),
-        **EconomyRateMixin.aggregator,
-    }
+    aggregate_function = Sum
 
 
-class RunsSeasonView(SeasonStatistic):
+class EconomyRateSeasonView(EconomyRateMixin, SeasonStatistic):
 
-    ordering = "-batting_runs"
-
-
-class RunsCareerView(CareerStatistic):
-
-    aggregator = Sum("batting_runs")
-    ordering = "-batting_runs__sum"
+    aggregate_function = F
