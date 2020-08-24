@@ -3,48 +3,48 @@
 <h2>{{ table.title }}</h2>
 {% endif %}
 <div class="table-responsive">
-    <table class="table table-hover table-striped table-bordered table-condensed">
-        <thead>
-            <tr>
-                {% for attr, name in table.columns.items %}
-                {% if not table.skip_columns or attr not in table.skip_columns %}
-                <th class="{% if attr == table.link_column %}text-left{% else %}text-center{% endif %}">
-                    {{ name }}
-                </th>
-                {% endif %}
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in table.data %}
-            <tr{% if table.highlight_first_row and forloop.counter0 == 0 %} class="info"{% endif %}>
-            {% for attr, name in table.columns.items %}
-            {% if not table.skip_columns or attr not in table.skip_columns %}
-            {% attrgetter item attr as column_value %}
-                <td class="{% if attr == table.link_column %}text-left{% else %}text-center{% endif %}">
-                    {% if attr == table.link_column %}
-                    {% attrgetter item table.link_column_field as link_pk %}
-                    {% attrgetter item table.link_column_filter as filter_pk %}
-                    <a href="{% url table.link_page_name link_pk %}{% if filter_pk %}?id={{ filter_pk }}{% endif %}">
-                    {% endif %}
-                    {% if not column_value %}
-                        {{ table.default }}
-                    {% elif attr in table.float_columns %}
-                        {{ column_value|floatformat:2 }}
-                    {% else %}
-                        {{ column_value }}
-                    {% endif %}
-                    {% if attr == table.link_column %}
-                    </a>
-                    {% endif %}
-                </td>
-            {% endif %}
-            {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% if table.footnote %}
-    <div class="pull-right"><small>{{ table.footnote }}</small></div>
-    {% endif %}
+  <table class="table table-hover table-striped table-bordered table-condensed">
+    <thead>
+      <tr>
+        {% for attr, name in table.columns.items %}
+        {% if not table.skip_columns or attr not in table.skip_columns %}
+        <th class="{% if attr == table.link_column %}text-left{% else %}text-center{% endif %}">
+          {{ name }}
+        </th>
+        {% endif %}
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in table.data %}
+      <tr{% if table.highlight_first_row and forloop.counter0 == 0 %} class="info"{% endif %}>
+      {% for attr, name in table.columns.items %}
+      {% if not table.skip_columns or attr not in table.skip_columns %}
+      {% attrgetter item attr as column_value %}
+        <td class="{% if attr == table.link_column %}text-left{% else %}text-center{% endif %}">
+          {% if attr == table.link_column %}
+          {% attrgetter item table.link_column_field as link_pk %}
+          {% attrgetter item table.link_column_filter as filter_pk %}
+          <a href="{% url table.link_page_name link_pk %}{% if filter_pk %}?id={{ filter_pk }}{% endif %}">
+          {% endif %}
+          {% if not column_value %}
+            {{ table.default }}
+          {% elif attr in table.float_columns %}
+            {{ column_value|floatformat:2 }}
+          {% else %}
+            {{ column_value }}
+          {% endif %}
+          {% if attr == table.link_column %}
+          </a>
+          {% endif %}
+        </td>
+      {% endif %}
+      {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if table.footnote %}
+  <div class="pull-right"><small>{{ table.footnote }}</small></div>
+  {% endif %}
 </div>
