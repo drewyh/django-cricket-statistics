@@ -1,6 +1,9 @@
 """Views for statistics."""
 
-from django.db.models import Case, F, Sum, When
+from abc import ABC
+from typing import Callable, Dict, Optional, Sequence
+
+from django.db.models import Case, F, QuerySet, Sum, When
 from django.views.generic import ListView
 
 from django_cricket_statistics.models import Statistic, BALLS_PER_OVER
@@ -12,16 +15,16 @@ class PlayerStatisticView(ListView):
     model = Statistic
     paginate_by = 20
 
-    aggregates = None
-    filters = None
-    group_by = None
+    aggregates: Optional[Dict] = None
+    filters: Optional[Dict] = None
+    group_by: Optional[Sequence] = None
 
     @classmethod
-    def get_aggregates(cls):
+    def get_aggregates(cls) -> Optional[Dict]:
         """Return aggregates from a method."""
         return None
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""
         # handle filtering from the url
         pre_filters = {
@@ -32,7 +35,7 @@ class PlayerStatisticView(ListView):
         queryset = self.model.objects.filter(**pre_filters)
 
         # group the results
-        group_by = self.group_by or {}
+        group_by = self.group_by or []
         if group_by:
             queryset = queryset.values(*group_by)
 
@@ -55,13 +58,19 @@ class PlayerStatisticView(ListView):
         return queryset
 
 
-class SeasonStatistic(PlayerStatisticView):
+class AggregatorMixinABC(ABC):
+    """Abstract base class for aggregator attribute."""
+
+    aggregator: Callable
+
+
+class SeasonStatistic(AggregatorMixinABC, PlayerStatisticView):
     """Display statistics for each season."""
 
     aggregator = F
 
 
-class CareerStatistic(PlayerStatisticView):
+class CareerStatistic(AggregatorMixinABC, PlayerStatisticView):
     """Display all statistics for a given player."""
 
     group_by = ("player",)
@@ -88,13 +97,13 @@ class BattingRunsSeasonView(SeasonStatistic):
     ordering = "-batting_runs"
 
 
-class BattingAverageMixin:
+class BattingAverageMixin(AggregatorMixinABC):
     """Mixin for calculating batting average."""
 
     ordering = "-batting_average"
 
     @classmethod
-    def get_aggregates(cls):
+    def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
         return {
             "batting_outs__sum": cls.aggregator("batting_innings")
@@ -138,13 +147,13 @@ class WicketsSeasonView(SeasonStatistic):
     ordering = "-wickets"
 
 
-class BowlingAverageMixin:
+class BowlingAverageMixin(AggregatorMixinABC):
     """Mixin for calculating bowling average."""
 
     ordering = "bowling_average"
 
     @classmethod
-    def get_aggregates(cls):
+    def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
         return {
             "bowling_runs__sum": cls.aggregator("bowling_runs"),
@@ -169,13 +178,13 @@ class BowlingAverageSeasonView(BowlingAverageMixin, SeasonStatistic):
     """Best season bowling average."""
 
 
-class BowlingEconomyRateMixin:
+class BowlingEconomyRateMixin(AggregatorMixinABC):
     """Mixin for calculating bowling economy rate."""
 
     ordering = "bowling_economy_rate"
 
     @classmethod
-    def get_aggregates(cls):
+    def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
         return {
             "bowling_balls__sum": cls.aggregator("bowling_balls"),
@@ -202,13 +211,13 @@ class BowlingEconomyRateSeasonView(BowlingEconomyRateMixin, SeasonStatistic):
     """Best season bowling economy rate."""
 
 
-class BowlingStrikeRateMixin:
+class BowlingStrikeRateMixin(AggregatorMixinABC):
     """Mixin for calculating bowling strike rate."""
 
     ordering = "bowling_strike_rate"
 
     @classmethod
-    def get_aggregates(cls):
+    def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
         return {
             "bowling_wickets__sum": cls.aggregator("bowling_wickets"),

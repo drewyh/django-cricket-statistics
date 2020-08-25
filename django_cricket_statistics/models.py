@@ -1,6 +1,7 @@
 """Models for statistics."""
 
 from decimal import Decimal
+from typing import Tuple
 
 from django.db import models
 from django.core.validators import MinValueValidator
@@ -35,27 +36,26 @@ class Player(CricketModelBase):
         unique_together = ("first_name", "nickname", "middle_names", "last_name")
         ordering = ("last_name", "first_name", "middle_names")
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         """Get url to a given model."""
         return reverse("player_career", args=(str(self.id),))
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return the name of the player as initials and surname."""
 
-        def initials(names):
+        def initials(names: Tuple[str, ...]) -> str:
             """Return initials of first and middles names."""
             name_split = str(names).split()
             return "".join(s[0].upper() for s in name_split)
 
-        inits = tuple(initials(n) for n in (self.first_name, self.middle_names))
-        inits = "".join(inits)
+        inits = "".join((initials(n) for n in (self.first_name, self.middle_names)))
         inits = inits if inits else "Mr."
         short_name = " ".join((inits, self.last_name))
 
         return short_name
 
     @property
-    def long_name(self):
+    def long_name(self) -> str:
         """Return the full name (including nickname)."""
         names = (
             self.first_name or "Mr.",
@@ -66,7 +66,7 @@ class Player(CricketModelBase):
         return " ".join(n for n in names if n is not None)
 
     @property
-    def short_name(self):
+    def short_name(self) -> str:
         """Return the name of the player as initials and surname."""
         return str(self)
 
@@ -79,7 +79,7 @@ class Season(CricketModelBase):
     class Meta:  # noqa: D106
         ordering = ("-year",)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return the season in YYYY/YY format."""
         year_after = str(self.year_after)
         year_after = year_after[-2:]
@@ -87,12 +87,12 @@ class Season(CricketModelBase):
         return f"{self.year}/{year_after}"
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Stringify the year."""
         return str(self)
 
     @property
-    def year_after(self):
+    def year_after(self) -> int:
         """Which year follows this one."""
         return int(self.year) + 1
 
@@ -106,7 +106,7 @@ class Grade(CricketModelBase):
     class Meta:  # noqa: D106
         ordering = ("-is_senior", "grade")
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return the string representation of the grade."""
         return str(self.grade)
 
@@ -141,12 +141,12 @@ class Statistic(CricketModelBase):
     batting_6s = models.PositiveSmallIntegerField("6s", default=0)
 
     @property
-    def batting_high_score(self):
+    def batting_high_score(self) -> str:
         """Return a string of the high score."""
         not_out_string = "*" if self.batting_high_score_is_not_out else ""
         return f"{self.batting_high_score_runs}{not_out_string}"
 
-    batting_high_score.fget.short_description = "HS"
+    batting_high_score.fget.short_description = "HS"  # type: ignore
 
     # bowling stats
     bowling_wickets = models.PositiveSmallIntegerField("wkts", default=0)
@@ -161,14 +161,14 @@ class Statistic(CricketModelBase):
     bowling_balls = models.PositiveSmallIntegerField("balls", default=0, blank=True)
 
     @property
-    def bowling_best_bowling(self):
+    def bowling_best_bowling(self) -> str:
         """Return a string of the best bowling."""
         return f"{self.best_bowling_wickets}/{self.best_bowling_runs}"
 
-    bowling_best_bowling.fget.short_description = "BBI"
+    bowling_best_bowling.fget.short_description = "BBI"  # type: ignore
 
     @property
-    def bowling_overs(self):
+    def bowling_overs(self) -> Decimal:
         """Calculate the overs from the balls bowled."""
         ovs, balls = divmod(self.bowling_balls, BALLS_PER_OVER)
         overs = Decimal(ovs) + Decimal(balls) / Decimal(10)
@@ -191,7 +191,7 @@ class Statistic(CricketModelBase):
             "grade",
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string for the statistic."""
         return f"{self.player.long_name} - {self.season} - {self.grade}"
 
@@ -210,15 +210,15 @@ class Hundred(CricketModelBase):
     is_in_final = models.BooleanField(default=False)
 
     @property
-    def score(self):
+    def score(self) -> str:
         """Return a string of score."""
         not_out_string = "*" if self.is_not_out else ""
         finals_string = "#" if self.is_in_final else ""
         return f"{self.runs}{not_out_string}{finals_string}"
 
-    score.fget.short_description = "score"
+    score.fget.short_description = "score"  # type: ignore
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the hundred."""
         return self.score
 
@@ -237,9 +237,9 @@ class FiveWicketInning(CricketModelBase):
     is_in_final = models.BooleanField(default=False)
 
     @property
-    def figures(self):
+    def figures(self) -> str:
         """Return a string of the bowling figures."""
         finals_string = "#" if self.is_in_final else ""
         return f"{self.wickets}/{self.runs}{finals_string}"
 
-    figures.fget.short_description = "figures"
+    figures.fget.short_description = "figures"  # type: ignore
