@@ -15,7 +15,7 @@ class CricketModelBase(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta:  # noqa: D106
         abstract = True
 
 
@@ -31,17 +31,19 @@ class Player(CricketModelBase):
         unique=True, blank=True, null=True
     )
 
-    class Meta:
+    class Meta:  # noqa: D106
         unique_together = ("first_name", "nickname", "middle_names", "last_name")
         ordering = ("last_name", "first_name", "middle_names")
 
     def get_absolute_url(self):
+        """Get url to a given model."""
         return reverse("player_career", args=(str(self.id),))
 
     def __str__(self):
         """Return the name of the player as initials and surname."""
 
         def initials(names):
+            """Return initials of first and middles names."""
             name_split = str(names).split()
             return "".join(s[0].upper() for s in name_split)
 
@@ -74,7 +76,7 @@ class Season(CricketModelBase):
 
     year = models.PositiveSmallIntegerField(unique=True)
 
-    class Meta:
+    class Meta:  # noqa: D106
         ordering = ("-year",)
 
     def __str__(self):
@@ -101,10 +103,11 @@ class Grade(CricketModelBase):
     grade = models.CharField(max_length=50)
     is_senior = models.BooleanField(default=True)
 
-    class Meta:
+    class Meta:  # noqa: D106
         ordering = ("-is_senior", "grade")
 
     def __str__(self):
+        """Return the string representation of the grade."""
         return str(self.grade)
 
 
@@ -139,6 +142,7 @@ class Statistic(CricketModelBase):
 
     @property
     def batting_high_score(self):
+        """Return a string of the high score."""
         not_out_string = "*" if self.batting_high_score_is_not_out else ""
         return f"{self.batting_high_score_runs}{not_out_string}"
 
@@ -158,12 +162,14 @@ class Statistic(CricketModelBase):
 
     @property
     def bowling_best_bowling(self):
+        """Return a string of the best bowling."""
         return f"{self.best_bowling_wickets}/{self.best_bowling_runs}"
 
     bowling_best_bowling.fget.short_description = "BBI"
 
     @property
     def bowling_overs(self):
+        """Calculate the overs from the balls bowled."""
         ovs, balls = divmod(self.bowling_balls, BALLS_PER_OVER)
         overs = Decimal(ovs) + Decimal(balls) / Decimal(10)
         return overs
@@ -175,7 +181,7 @@ class Statistic(CricketModelBase):
     fielding_throw_outs = models.PositiveSmallIntegerField("TO", default=0)
     fielding_stumpings = models.PositiveSmallIntegerField("st", default=0)
 
-    class Meta:
+    class Meta:  # noqa: D106
         unique_together = ("player", "season", "grade")
         ordering = (
             "player__last_name",
@@ -186,6 +192,7 @@ class Statistic(CricketModelBase):
         )
 
     def __str__(self):
+        """Return a string for the statistic."""
         return f"{self.player.long_name} - {self.season} - {self.grade}"
 
 
@@ -204,6 +211,7 @@ class Hundred(CricketModelBase):
 
     @property
     def score(self):
+        """Return a string of score."""
         not_out_string = "*" if self.is_not_out else ""
         finals_string = "#" if self.is_in_final else ""
         return f"{self.runs}{not_out_string}{finals_string}"
@@ -211,6 +219,7 @@ class Hundred(CricketModelBase):
     score.fget.short_description = "score"
 
     def __str__(self):
+        """String representation of the hundred."""
         return self.score
 
 
@@ -229,6 +238,7 @@ class FiveWicketInning(CricketModelBase):
 
     @property
     def figures(self):
+        """Return a string of the bowling figures."""
         finals_string = "#" if self.is_in_final else ""
         return f"{self.wickets}/{self.runs}{finals_string}"
 
