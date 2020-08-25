@@ -44,7 +44,7 @@ class PlayerStatisticView(ListView):
 
         # annotate the required value
         aggregates = self.aggregates or self.get_aggregates()
-        if self.aggregates is not None:
+        if aggregates is not None:
             if isinstance(aggregates, dict):
                 queryset = queryset.annotate(**aggregates)
             else:
