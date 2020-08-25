@@ -13,7 +13,7 @@ class PlayerStatisticView(ListView):
     model = Statistic
     paginate_by = 20
 
-    aggregator = None
+    aggregates = None
     filters = None
     group_by = None
 
@@ -35,11 +35,11 @@ class PlayerStatisticView(ListView):
         qs = qs.select_related("player")
 
         # annotate the required value
-        if self.aggregator is not None:
-            if isinstance(self.aggregator, dict):
-                qs = qs.annotate(**self.aggregator)
+        if self.aggregates is not None:
+            if isinstance(self.aggregates, dict):
+                qs = qs.annotate(**self.aggregates)
             else:
-                qs = qs.annotate(self.aggregator)
+                qs = qs.annotate(self.aggregates)
 
         # apply filters
         if self.filters is not None:
@@ -51,22 +51,25 @@ class PlayerStatisticView(ListView):
 class SeasonStatistic(PlayerStatisticView):
     """Display statistics for each season."""
 
+    aggregator = F
+
 
 class CareerStatistic(PlayerStatisticView):
     """Display all statistics for a given player."""
 
     group_by = ("player",)
+    aggregator = Sum
 
 
 class MatchesCareerView(CareerStatistic):
 
-    aggregator = Sum("matches")
+    aggregates = Sum("matches")
     ordering = "-matches_sum"
 
 
 class BattingRunsCareerView(CareerStatistic):
 
-    aggregator = Sum("batting_runs")
+    aggregates = Sum("batting_runs")
     ordering = "-batting_runs__sum"
 
 
@@ -77,11 +80,10 @@ class BattingRunsSeasonView(SeasonStatistic):
 
 class BattingAverageMixin:
 
-    aggregate_function = None
-    aggregator = {
-        batting_outs__sum: BattingAverageMixin.aggregate_function("batting_innings")
-        - BattingAverageMixin.aggregate_function("batting_not_outs"),
-        batting_runs__sum: BattingAverageMixin.aggregate_function("batting_runs"),
+    aggregates = {
+        batting_outs__sum: BattingAverageMixin.aggregator("batting_innings")
+        - BattingAverageMixin.aggregator("batting_not_outs"),
+        batting_runs__sum: BattingAverageMixin.aggregator("batting_runs"),
         batting_average: (
             Case(
                 When(
@@ -96,13 +98,11 @@ class BattingAverageMixin:
 
 
 class BattingAverageCareerView(BattingAverageMixin, CareerStatistic):
-
-    aggregate_function = Sum
+    pass
 
 
 class BattingAverageCareerView(BattingAverageMixin, CareerStatistic):
-
-    aggregate_function = F
+    pass
 
 
 # class BestBattingInningsView(CareerStatistic):
@@ -112,7 +112,7 @@ class BattingAverageCareerView(BattingAverageMixin, CareerStatistic):
 
 class WicketsCareerView(CareerStatistic):
 
-    aggregator = Sum("wickets")
+    aggregates = Sum("wickets")
     ordering = "-wickets__sum"
 
 
@@ -123,10 +123,9 @@ class WicketsSeasonView(SeasonStatistic):
 
 class BowlingAverageMixin:
 
-    aggregate_function = None
-    aggregator = {
-        bowling_runs__sum: BowlingAverageMixin.aggregate_function("bowling_runs"),
-        bowling_wickets__sum: BowlingAverageMixin.aggregate_function("bowling_wickets"),
+    aggregates = {
+        bowling_runs__sum: BowlingAverageMixin.aggregator("bowling_runs"),
+        bowling_wickets__sum: BowlingAverageMixin.aggregator("bowling_wickets"),
         bowling_average: (
             Case(
                 When(
@@ -141,21 +140,18 @@ class BowlingAverageMixin:
 
 
 class BowlingAverageCareerView(BowlingAverageMixin, CareerStatistic):
-
-    aggregate_function = Sum
+    pass
 
 
 class BowlingAverageSeasonView(BowlingAverageMixin, SeasonStatistic):
-
-    aggregate_function = F
+    pass
 
 
 class EconomyRateMixin:
 
-    aggregate_function = None
-    aggregator = {
-        bowling_balls__sum: EconomyRateMixin.aggregate_function("bowling_balls"),
-        bowling_runs__sum: EconomyRateMixin.aggregate_function("bowling_runs"),
+    aggregates = {
+        bowling_balls__sum: EconomyRateMixin.aggregator("bowling_balls"),
+        bowling_runs__sum: EconomyRateMixin.aggregator("bowling_runs"),
         bowling_economy_rate: (
             Case(
                 When(
@@ -172,21 +168,18 @@ class EconomyRateMixin:
 
 
 class EconomyRateCareerView(EconomyRateMixin, CareerStatistic):
-
-    aggregate_function = Sum
+    pass
 
 
 class EconomyRateSeasonView(EconomyRateMixin, SeasonStatistic):
-
-    aggregate_function = F
+    pass
 
 
 class StrikeRateMixin:
 
-    aggregate_function = None
-    aggregator = {
-        bowling_wickets__sum: StrikeRateMixin.aggregate_function("bowling_wickets"),
-        bowling_balls__sum: StrikeRateMixin.aggregate_function("bowling_balls"),
+    aggregates = {
+        bowling_wickets__sum: StrikeRateMixin.aggregator("bowling_wickets"),
+        bowling_balls__sum: StrikeRateMixin.aggregator("bowling_balls"),
         bowling_strike_rate: (
             Case(
                 When(
@@ -203,13 +196,11 @@ class StrikeRateMixin:
 
 
 class StrikeRateCareerView(StrikeRateMixin, CareerStatistic):
-
-    aggregate_function = Sum
+    pass
 
 
 class StrikeRateSeasonView(StrikeRateMixin, SeasonStatistic):
-
-    aggregate_function = F
+    pass
 
 
 # class BestBowlingInningsView(CareerStatistic):
