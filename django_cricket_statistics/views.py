@@ -105,19 +105,9 @@ class BattingAverageCareerView(BattingAverageMixin, CareerStatistic):
     aggregate_function = F
 
 
-# class BestInningsCareer(CareerStatistic):
-#
-#    aggregator = Sum("wickets")
-
-
+# class BestBattingInningsView(CareerStatistic):
 # class HundredsCareerView(CareerStatistic):
-#
-#    aggregator = Sum("wickets")
-
-
 # class HundredsSeasonView(CareerStatistic):
-#
-#    aggregator = Sum("wickets")
 
 
 class WicketsCareerView(CareerStatistic):
@@ -166,7 +156,7 @@ class EconomyRateMixin:
     aggregator = {
         bowling_balls__sum: EconomyRateMixin.aggregate_function("bowling_balls"),
         bowling_runs__sum: EconomyRateMixin.aggregate_function("bowling_runs"),
-        economy_rate: (
+        bowling_economy_rate: (
             Case(
                 When(
                     bowling_balls__sum__gt=0,
@@ -178,7 +168,7 @@ class EconomyRateMixin:
             ),
         ),
     }
-    ordering = "economy_rate"
+    ordering = "bowling_economy_rate"
 
 
 class EconomyRateCareerView(EconomyRateMixin, CareerStatistic):
@@ -189,3 +179,54 @@ class EconomyRateCareerView(EconomyRateMixin, CareerStatistic):
 class EconomyRateSeasonView(EconomyRateMixin, SeasonStatistic):
 
     aggregate_function = F
+
+
+class StrikeRateMixin:
+
+    aggregate_function = None
+    aggregator = {
+        bowling_wickets__sum: StrikeRateMixin.aggregate_function("bowling_wickets"),
+        bowling_balls__sum: StrikeRateMixin.aggregate_function("bowling_balls"),
+        bowling_strike_rate: (
+            Case(
+                When(
+                    bowling_wickets__sum__gt=0,
+                    then=F("bowling_wickets__sum")
+                    / F("bowling_balls__sum")
+                    * BALLS_PER_OVER,
+                ),
+                default=None,
+            ),
+        ),
+    }
+    ordering = "bowling_strike_rate"
+
+
+class StrikeRateCareerView(StrikeRateMixin, CareerStatistic):
+
+    aggregate_function = Sum
+
+
+class StrikeRateSeasonView(StrikeRateMixin, SeasonStatistic):
+
+    aggregate_function = F
+
+
+# class BestBowlingInningsView(CareerStatistic):
+# class FiveWicketInningsSeasonView(SeasonStatistic):
+# class FiveWicketInningsCareerView(CareerStatistic):
+
+
+# class AllRounder1000Runs100WicketsView(CareerStatistic):
+
+
+# class WicketkeepingDismissalsCareerView(CareerStatistic):
+# class WicketkeepingDismissalsSeasonView(SeasonStatistic):
+# class WicketkeepingCatchesCareerView(CareerStatistic):
+# class WicketkeepingCatchesSeasonView(SeasonStatistic):
+# class WicketkeepingStumpingsCareerView(CareerStatistic):
+# class WicketkeepingStumpingsSeasonView(SeasonStatistic):
+
+
+# class FieldingCatchesCareerView(CareerStatistic):
+# class FieldingCatchesSeasonView(SeasonStatistic):
