@@ -1,12 +1,29 @@
 """Views for statistics."""
 
 from abc import ABC
-from typing import Callable, Dict, Optional, Sequence
+from typing import Callable, Dict, Optional, Tuple
 
-from django.db.models import Case, F, QuerySet, Sum, When
+from django.db.models import (
+    Case,
+    Count,
+    Expression,
+    F,
+    IntegerField,
+    Model,
+    OuterRef,
+    QuerySet,
+    Subquery,
+    Sum,
+    When,
+)
 from django.views.generic import ListView
 
-from django_cricket_statistics.models import Hundred, Statistic, BALLS_PER_OVER
+from django_cricket_statistics.models import (
+    FiveWicketInning,
+    Hundred,
+    Statistic,
+    BALLS_PER_OVER,
+)
 
 
 class PlayerStatisticView(ListView):
@@ -15,9 +32,9 @@ class PlayerStatisticView(ListView):
     model = Statistic
     paginate_by = 20
 
-    aggregates: Optional[Dict] = None
+    aggregates: Optional[Expression] = None
     filters: Optional[Dict] = None
-    group_by: Optional[Sequence] = None
+    group_by: Tuple[str, ...] = tuple()
 
     @classmethod
     def get_aggregates(cls) -> Dict:
@@ -33,25 +50,31 @@ class PlayerStatisticView(ListView):
             if name in self.kwargs
         }
 
-        group_by = self.group_by or []
-
         aggregates = self.get_aggregates()
         if self.aggregates:
-            aggregates = {agg.default_alias: agg for agg in self.aggregates}
+            aggregates = {self.aggregates.default_alias: self.aggregates}
 
         filters = self.filters or {}
 
         return create_queryset(
+            model=self.model,
             pre_filters=pre_filters,
-            group_by=group_by,
+            group_by=self.group_by,
             aggregates=aggregates,
             filters=filters,
         )
 
 
-def create_queryset(pre_filters=None, group_by=None, aggregates=None, filters=None):
+def create_queryset(
+    model: Optional[Model] = None,
+    pre_filters: Optional[Dict] = None,
+    group_by: Optional[Tuple] = None,
+    aggregates: Optional[Dict] = None,
+    filters: Optional[Dict] = None,
+) -> QuerySet:
     """Create a queryset by applying filters, grouping, aggregation."""
-    queryset = self.model.objects.all()
+    assert model is not None
+    queryset = model.objects.all()
 
     queryset = queryset.filter(**pre_filters) if pre_filters else queryset
 
@@ -79,6 +102,7 @@ class AggregatorMixinABC(ABC):
 class SeasonStatistic(AggregatorMixinABC, PlayerStatisticView):
     """Display statistics for each season."""
 
+    group_by = ("player", "season")
     aggregator = F
 
 
@@ -159,6 +183,7 @@ class BattingHundredsMixin(AggregatorMixinABC):
 
     @classmethod
     def get_aggregates(cls) -> Dict:
+        """Return the required aggregate values for annotation."""
         hundreds = (
             Hundred.objects.filter(statistic=OuterRef("pk"))
             .order_by()
@@ -293,6 +318,7 @@ class BowlingStrikeRateSeasonView(BowlingStrikeRateMixin, SeasonStatistic):
 
 
 class BestBowlingInningsView(CareerStatistic):
+    """Best bowling innings."""
 
     ordering = ("-best_bowling_wickets", "best_bowling_runs", "grade", "-season")
 
@@ -304,6 +330,7 @@ class BowlingFiveWicketInningsMixin(AggregatorMixinABC):
 
     @classmethod
     def get_aggregates(cls) -> Dict:
+        """Return the required aggregate values for annotation."""
         five_wicket_innings = (
             FiveWicketInning.objects.filter(statistic=OuterRef("pk"))
             .values("statistic")
