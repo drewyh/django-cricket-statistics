@@ -6,7 +6,7 @@ from typing import Callable, Dict, Optional, Sequence
 from django.db.models import Case, F, QuerySet, Sum, When
 from django.views.generic import ListView
 
-from django_cricket_statistics.models import Statistic, BALLS_PER_OVER
+from django_cricket_statistics.models import Hundred, Statistic, BALLS_PER_OVER
 
 
 class PlayerStatisticView(ListView):
@@ -20,9 +20,9 @@ class PlayerStatisticView(ListView):
     group_by: Optional[Sequence] = None
 
     @classmethod
-    def get_aggregates(cls) -> Optional[Dict]:
+    def get_aggregates(cls) -> Dict:
         """Return aggregates from a method."""
-        return None
+        return {}
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""
@@ -32,30 +32,42 @@ class PlayerStatisticView(ListView):
             for name in ("grade", "season")
             if name in self.kwargs
         }
-        queryset = self.model.objects.filter(**pre_filters)
 
-        # group the results
         group_by = self.group_by or []
-        if group_by:
-            queryset = queryset.values(*group_by)
 
-        # the associated player is always required
-        queryset = queryset.select_related("player")
+        aggregates = self.get_aggregates()
+        if self.aggregates:
+            aggregates = {agg.default_alias: agg for agg in self.aggregates}
 
-        # annotate the required value
-        aggregates = self.aggregates or self.get_aggregates()
-        if aggregates is not None:
-            if isinstance(aggregates, dict):
-                queryset = queryset.annotate(**aggregates)
-            else:
-                queryset = queryset.annotate(aggregates)
-
-        # apply filters
         filters = self.filters or {}
-        if filters:
-            queryset = queryset.filter(**filters)
 
-        return queryset
+        return create_queryset(
+            pre_filters=pre_filters,
+            group_by=group_by,
+            aggregates=aggregates,
+            filters=filters,
+        )
+
+
+def create_queryset(pre_filters=None, group_by=None, aggregates=None, filters=None):
+    """Create a queryset by applying filters, grouping, aggregation."""
+    queryset = self.model.objects.all()
+
+    queryset = queryset.filter(**pre_filters) if pre_filters else queryset
+
+    # group the results for aggregation
+    queryset = queryset.values(*group_by) if group_by else queryset
+
+    # the associated player is always required
+    queryset = queryset.select_related("player")
+
+    # annotate the required values
+    queryset = queryset.annotate(**aggregates) if aggregates else queryset
+
+    # apply filters
+    queryset = queryset.filter(**filters) if filters else queryset
+
+    return queryset
 
 
 class AggregatorMixinABC(ABC):
@@ -129,9 +141,45 @@ class BattingAverageSeasonView(BattingAverageMixin, SeasonStatistic):
     """Best season batting average."""
 
 
-# class BestBattingInningsView(CareerStatistic):
-# class HundredsCareerView(CareerStatistic):
-# class HundredsSeasonView(CareerStatistic):
+class BestBattingInningsView(CareerStatistic):
+    """Best batting innings."""
+
+    ordering = (
+        "-batting_high_score",
+        "-batting_high_score_is_not_out",
+        "grade",
+        "-season",
+    )
+
+
+class BattingHundredsMixin(AggregatorMixinABC):
+    """Mixin for counting hundreds."""
+
+    ordering = "-hundreds__count"
+
+    @classmethod
+    def get_aggregates(cls) -> Dict:
+        hundreds = (
+            Hundred.objects.filter(statistic=OuterRef("pk"))
+            .order_by()
+            .values("statistic")
+            .annotate(hund=Count("*"))
+            .values("hund")
+        )
+
+        return {
+            "hundreds__count": cls.aggregator(
+                Subquery(hundreds, output_field=IntegerField())
+            )
+        }
+
+
+class HundredsCareerView(BattingHundredsMixin, CareerStatistic):
+    """Number of career hundreds."""
+
+
+class HundredsSeasonView(BattingHundredsMixin, CareerStatistic):
+    """Number of season hundreds."""
 
 
 class WicketsCareerView(CareerStatistic):
@@ -244,9 +292,38 @@ class BowlingStrikeRateSeasonView(BowlingStrikeRateMixin, SeasonStatistic):
     """Best season bowling strike rate."""
 
 
-# class BestBowlingInningsView(CareerStatistic):
-# class FiveWicketInningsSeasonView(SeasonStatistic):
-# class FiveWicketInningsCareerView(CareerStatistic):
+class BestBowlingInningsView(CareerStatistic):
+
+    ordering = ("-best_bowling_wickets", "best_bowling_runs", "grade", "-season")
+
+
+class BowlingFiveWicketInningsMixin(AggregatorMixinABC):
+    """Mixin for counting five wicket innings."""
+
+    ordering = "-five_wicket_innings__count"
+
+    @classmethod
+    def get_aggregates(cls) -> Dict:
+        five_wicket_innings = (
+            FiveWicketInning.objects.filter(statistic=OuterRef("pk"))
+            .values("statistic")
+            .annotate(five=Count("*"))
+            .values("five")
+        )
+
+        return {
+            "five_wicket_innings___count": cls.aggregator(
+                Subquery(five_wicket_innings, output_field=IntegerField())
+            )
+        }
+
+
+class FiveWicketInningsCareerView(BowlingFiveWicketInningsMixin, CareerStatistic):
+    """Number of career hundreds."""
+
+
+class FiveWicketInningsSeasonView(BowlingFiveWicketInningsMixin, SeasonStatistic):
+    """Number of season hundreds."""
 
 
 # class AllRounder1000Runs100WicketsView(CareerStatistic):
