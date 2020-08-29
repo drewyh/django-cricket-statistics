@@ -2,10 +2,15 @@
 
 from typing import Dict
 
-from django.db.models import Case, Count, F, IntegerField, OuterRef, Subquery, Sum, When
+from django.db.models import Sum
 
-from django_cricket_statistics.models import FiveWicketInning, BALLS_PER_OVER
 from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
+from django_cricket_statistics.statistics import (
+    BOWLING_AVERAGE,
+    BOWLING_STRIKE_RATE,
+    BOWLING_ECONOMY_RATE,
+    FIVE_WICKET_INNINGS,
+)
 
 
 class WicketsCareerView(CareerStatistic):
@@ -29,19 +34,7 @@ class BowlingAverageMixin:
     @classmethod
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
-        return {
-            "bowling_runs__sum": Sum("bowling_runs"),
-            "bowling_wickets__sum": Sum("bowling_wickets"),
-            "bowling_average": (
-                Case(
-                    When(
-                        bowling_wickets__sum__gt=0,
-                        then=F("bowling_runs__sum") / F("bowling_wickets__sum"),
-                    ),
-                    default=None,
-                ),
-            ),
-        }
+        return BOWLING_AVERAGE
 
 
 class BowlingAverageCareerView(BowlingAverageMixin, CareerStatistic):
@@ -60,21 +53,7 @@ class BowlingEconomyRateMixin:
     @classmethod
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
-        return {
-            "bowling_balls__sum": Sum("bowling_balls"),
-            "bowling_runs__sum": Sum("bowling_runs"),
-            "bowling_economy_rate": (
-                Case(
-                    When(
-                        bowling_balls__sum__gt=0,
-                        then=F("bowling_runs__sum")
-                        / F("bowling_balls__sum")
-                        * BALLS_PER_OVER,
-                    ),
-                    default=None,
-                ),
-            ),
-        }
+        return BOWLING_ECONOMY_RATE
 
 
 class BowlingEconomyRateCareerView(BowlingEconomyRateMixin, CareerStatistic):
@@ -93,21 +72,7 @@ class BowlingStrikeRateMixin:
     @classmethod
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
-        return {
-            "bowling_wickets__sum": Sum("bowling_wickets"),
-            "bowling_balls__sum": Sum("bowling_balls"),
-            "bowling_strike_rate": (
-                Case(
-                    When(
-                        bowling_wickets__sum__gt=0,
-                        then=F("bowling_wickets__sum")
-                        / F("bowling_balls__sum")
-                        * BALLS_PER_OVER,
-                    ),
-                    default=None,
-                ),
-            ),
-        }
+        return BOWLING_STRIKE_RATE
 
 
 class BowlingStrikeRateCareerView(BowlingStrikeRateMixin, CareerStatistic):
@@ -132,18 +97,7 @@ class BowlingFiveWicketInningsMixin:
     @classmethod
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
-        five_wicket_innings = (
-            FiveWicketInning.objects.filter(statistic=OuterRef("pk"))
-            .values("statistic")
-            .annotate(five=Count("*"))
-            .values("five")
-        )
-
-        return {
-            "five_wicket_innings___count": Sum(
-                Subquery(five_wicket_innings, output_field=IntegerField())
-            )
-        }
+        return FIVE_WICKET_INNINGS
 
 
 class FiveWicketInningsCareerView(BowlingFiveWicketInningsMixin, CareerStatistic):

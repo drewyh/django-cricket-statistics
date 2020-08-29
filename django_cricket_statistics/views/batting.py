@@ -2,15 +2,10 @@
 
 from typing import Dict
 
-from django.db.models import Case, Count, F, IntegerField, OuterRef, Subquery, Sum, When
+from django.db.models import Sum
 
-from django_cricket_statistics.models import Hundred
-from django_cricket_statistics.views.common import (
-    CareerStatistic,
-    SeasonStatistic,
-    BATTING_AVERAGE,
-    HUNDREDS,
-)
+from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
+from django_cricket_statistics.statistics import BATTING_AVERAGE, HUNDREDS
 
 
 class BattingRunsCareerView(CareerStatistic):

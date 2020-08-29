@@ -87,36 +87,3 @@ class CareerStatistic(PlayerStatisticView):
     """Display all statistics for a given player."""
 
     group_by = ("player",)
-
-
-BATTING_RUNS = {"batting_runs__sum": Sum("batting_runs")}
-BATTING_INNINGS = {"batting_innings__sum": Sum("batting_innings")}
-BATTING_NOT_OUTS = {"batting_not_outs__sum": Sum("batting_not_outs")}
-BATTING_OUTS = {
-    **BATTING_INNINGS_AGG,
-    **BATTING_NOT_OUTS_AGG,
-    "batting_outs__sum": F("batting_innings__sum") - F("batting_outs__sum"),
-}
-BATTING_AVERAGE = {
-    **BATTING_RUNS_AGG,
-    **BATTING_OUTS_AGG,
-    "batting_average": (
-        Case(
-            When(
-                batting_outs__sum__gt=0,
-                then=F("batting_runs__sum") / F("batting_outs__sum"),
-            ),
-            default=None,
-        ),
-    ),
-}
-HUNDREDS_SUBQUERY = (
-    Hundred.objects.filter(statistic=OuterRef("pk"))
-    .order_by()
-    .values("statistic")
-    .annotate(hund=Count("*"))
-    .values("hund")
-)
-HUNDREDS = {
-    "hundreds__count": Sum(Subquery(HUNDREDS_SUBQUERY, output_field=IntegerField()))
-}
