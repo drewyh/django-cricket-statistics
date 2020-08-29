@@ -45,6 +45,7 @@ def create_queryset(
     group_by: Optional[Tuple] = None,
     aggregates: Optional[Dict] = None,
     filters: Optional[Dict] = None,
+    select_related: Optional[Tuple] = ("player",),
 ) -> QuerySet:
     """Create a queryset by applying filters, grouping, aggregation."""
     assert model is Statistic
@@ -58,7 +59,8 @@ def create_queryset(
     queryset = queryset.values(*group_by) if group_by else queryset
 
     # the associated player is always required
-    queryset = queryset.select_related("player")
+    if select_related:
+        queryset = queryset.select_related(*select_related)
 
     # annotate the required values
     queryset = queryset.annotate(**aggregates) if aggregates else queryset
