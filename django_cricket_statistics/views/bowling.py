@@ -1,11 +1,8 @@
 """Views for bowling statistics."""
 
-from typing import Dict
-
-from django.db.models import Sum
-
 from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
 from django_cricket_statistics.statistics import (
+    BOWLING_WICKETS,
     BOWLING_AVERAGE,
     BOWLING_STRIKE_RATE,
     BOWLING_ECONOMY_RATE,
@@ -13,96 +10,77 @@ from django_cricket_statistics.statistics import (
 )
 
 
-class WicketsCareerView(CareerStatistic):
+class BowlingWicketsCareerView(CareerStatistic):
     """Most career bowling wickets."""
 
-    aggregates = Sum("wickets")
-    ordering = "-wickets__sum"
+    aggregates = BOWLING_WICKETS
+    ordering = "-bowling_wickets__sum"
 
 
-class WicketsSeasonView(SeasonStatistic):
+class BowlingWicketsSeasonView(SeasonStatistic):
     """Most bowling wickets in a season."""
 
-    ordering = "-wickets"
+    aggregates = BOWLING_WICKETS
+    ordering = "-bowling_wickets__sum"
 
 
-class BowlingAverageMixin:
-    """Mixin for calculating bowling average."""
-
-    ordering = "bowling_average"
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        return BOWLING_AVERAGE
-
-
-class BowlingAverageCareerView(BowlingAverageMixin, CareerStatistic):
+class BowlingAverageCareerView(CareerStatistic):
     """Best career bowling average."""
 
+    aggregates = BOWLING_AVERAGE
+    ordering = "bowling_average"
 
-class BowlingAverageSeasonView(BowlingAverageMixin, SeasonStatistic):
+
+class BowlingAverageSeasonView(SeasonStatistic):
     """Best season bowling average."""
 
-
-class BowlingEconomyRateMixin:
-    """Mixin for calculating bowling economy rate."""
-
-    ordering = "bowling_economy_rate"
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        return BOWLING_ECONOMY_RATE
+    aggregates = BOWLING_AVERAGE
+    ordering = "bowling_average"
 
 
-class BowlingEconomyRateCareerView(BowlingEconomyRateMixin, CareerStatistic):
+class BowlingEconomyRateCareerView(CareerStatistic):
     """Best career bowling economy rate."""
 
+    aggregates = BOWLING_ECONOMY_RATE
+    ordering = "bowling_economy_rate"
 
-class BowlingEconomyRateSeasonView(BowlingEconomyRateMixin, SeasonStatistic):
+
+class BowlingEconomyRateSeasonView(SeasonStatistic):
     """Best season bowling economy rate."""
 
-
-class BowlingStrikeRateMixin:
-    """Mixin for calculating bowling strike rate."""
-
-    ordering = "bowling_strike_rate"
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        return BOWLING_STRIKE_RATE
+    aggregates = BOWLING_ECONOMY_RATE
+    ordering = "bowling_economy_rate"
 
 
-class BowlingStrikeRateCareerView(BowlingStrikeRateMixin, CareerStatistic):
+class BowlingStrikeRateCareerView(CareerStatistic):
     """Best career bowling strike rate."""
 
+    aggregates = BOWLING_STRIKE_RATE
+    ordering = "bowling_strike_rate"
 
-class BowlingStrikeRateSeasonView(BowlingStrikeRateMixin, SeasonStatistic):
+
+class BowlingStrikeRateSeasonView(SeasonStatistic):
     """Best season bowling strike rate."""
 
+    aggregates = BOWLING_STRIKE_RATE
+    ordering = "bowling_strike_rate"
 
-class BestBowlingInningsView(CareerStatistic):
+
+class BowlingBestInningsView(CareerStatistic):
     """Best bowling innings."""
 
     ordering = ("-best_bowling_wickets", "best_bowling_runs", "grade", "-season")
 
 
-class BowlingFiveWicketInningsMixin:
-    """Mixin for counting five wicket innings."""
+class BowlingFiveWicketInningsCareerView(CareerStatistic):
+    """Number of career five wicket innings."""
 
+    aggregates = FIVE_WICKET_INNINGS
     ordering = "-five_wicket_innings__count"
 
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        return FIVE_WICKET_INNINGS
 
+class BowlingFiveWicketInningsSeasonView(SeasonStatistic):
+    """Number of season five wicket innings."""
 
-class FiveWicketInningsCareerView(BowlingFiveWicketInningsMixin, CareerStatistic):
-    """Number of career hundreds."""
-
-
-class FiveWicketInningsSeasonView(BowlingFiveWicketInningsMixin, SeasonStatistic):
-    """Number of season hundreds."""
+    aggregates = FIVE_WICKET_INNINGS
+    ordering = "-five_wicket_innings__count"

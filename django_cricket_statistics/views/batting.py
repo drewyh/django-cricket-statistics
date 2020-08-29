@@ -1,47 +1,38 @@
 """Views for batting statistics."""
 
-from typing import Dict
-
-from django.db.models import Sum
-
 from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
-from django_cricket_statistics.statistics import BATTING_AVERAGE, HUNDREDS
+from django_cricket_statistics.statistics import BATTING_RUNS, BATTING_AVERAGE, HUNDREDS
 
 
 class BattingRunsCareerView(CareerStatistic):
     """Most career batting runs."""
 
-    aggregates = Sum("batting_runs")
+    aggregates = BATTING_RUNS
     ordering = "-batting_runs__sum"
 
 
 class BattingRunsSeasonView(SeasonStatistic):
     """Most batting runs in a season."""
 
-    aggregates = Sum("batting_runs")
-    ordering = "-batting_runs"
+    aggregates = BATTING_RUNS
+    ordering = "-batting_runs__sum"
 
 
-class BattingAverageMixin:
-    """Mixin for calculating batting average."""
-
-    ordering = "-batting_average"
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        return BATTING_AVERAGE
-
-
-class BattingAverageCareerView(BattingAverageMixin, CareerStatistic):
+class BattingAverageCareerView(CareerStatistic):
     """Best career batting average."""
 
+    aggregates = BATTING_AVERAGE
+    ordering = "-batting_average"
 
-class BattingAverageSeasonView(BattingAverageMixin, SeasonStatistic):
+
+class BattingAverageSeasonView(SeasonStatistic):
     """Best season batting average."""
 
+    aggregates = BATTING_AVERAGE
+    ordering = "-batting_average"
 
-class BestBattingInningsView(CareerStatistic):
+
+class BattingBestInningsView(CareerStatistic):
     """Best batting innings."""
 
     ordering = (
@@ -52,20 +43,15 @@ class BestBattingInningsView(CareerStatistic):
     )
 
 
-class BattingHundredsMixin:
-    """Mixin for counting hundreds."""
-
-    ordering = "-hundreds__count"
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        return HUNDREDS
-
-
-class HundredsCareerView(BattingHundredsMixin, CareerStatistic):
+class BattingHundredsCareerView(CareerStatistic):
     """Number of career hundreds."""
 
+    aggregates = HUNDREDS
+    ordering = "-hundreds__count"
 
-class HundredsSeasonView(BattingHundredsMixin, CareerStatistic):
+
+class BattingHundredsSeasonView(CareerStatistic):
     """Number of season hundreds."""
+
+    aggregates = HUNDREDS
+    ordering = "-hundreds__count"

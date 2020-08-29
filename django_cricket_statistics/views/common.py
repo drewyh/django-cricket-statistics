@@ -2,7 +2,7 @@
 
 from typing import Dict, Optional, Tuple
 
-from django.db.models import Expression, Model, QuerySet
+from django.db.models import Model, QuerySet
 from django.views.generic import ListView
 
 from django_cricket_statistics.models import Statistic
@@ -14,14 +14,9 @@ class PlayerStatisticView(ListView):
     model = Statistic
     paginate_by = 20
 
-    aggregates: Optional[Expression] = None
+    aggregates: Optional[Dict] = None
     filters: Optional[Dict] = None
     group_by: Tuple[str, ...] = tuple()
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return aggregates from a method."""
-        return {}
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""
@@ -32,10 +27,7 @@ class PlayerStatisticView(ListView):
             if name in self.kwargs
         }
 
-        aggregates = self.get_aggregates()
-        if self.aggregates:
-            aggregates = {self.aggregates.default_alias: self.aggregates}
-
+        aggregates = self.aggregates or {}
         filters = self.filters or {}
 
         return create_queryset(
