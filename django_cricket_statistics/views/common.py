@@ -94,25 +94,3 @@ class CareerStatistic(AggregatorMixinABC, PlayerStatisticView):
 
     group_by = ("player",)
     aggregator = Sum
-
-
-class MatchesCareerView(CareerStatistic):
-    """Most career games."""
-
-    aggregates = Sum("matches")
-    ordering = "-matches_sum"
-
-
-# class AllRounder1000Runs100WicketsView(CareerStatistic):
-
-
-# class WicketkeepingDismissalsCareerView(CareerStatistic):
-# class WicketkeepingDismissalsSeasonView(SeasonStatistic):
-# class WicketkeepingCatchesCareerView(CareerStatistic):
-# class WicketkeepingCatchesSeasonView(SeasonStatistic):
-# class WicketkeepingStumpingsCareerView(CareerStatistic):
-# class WicketkeepingStumpingsSeasonView(SeasonStatistic):
-
-
-# class FieldingCatchesCareerView(CareerStatistic):
-# class FieldingCatchesSeasonView(SeasonStatistic):
