@@ -5,7 +5,12 @@ from typing import Dict
 from django.db.models import Case, Count, F, IntegerField, OuterRef, Subquery, Sum, When
 
 from django_cricket_statistics.models import Hundred
-from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
+from django_cricket_statistics.views.common import (
+    CareerStatistic,
+    SeasonStatistic,
+    BATTING_AVERAGE,
+    HUNDREDS,
+)
 
 
 class BattingRunsCareerView(CareerStatistic):
@@ -30,19 +35,7 @@ class BattingAverageMixin:
     @classmethod
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
-        return {
-            "batting_outs__sum": Sum("batting_innings") - Sum("batting_not_outs"),
-            "batting_runs__sum": Sum("batting_runs"),
-            "batting_average": (
-                Case(
-                    When(
-                        batting_outs__sum__gt=0,
-                        then=F("batting_runs__sum") / F("batting_outs__sum"),
-                    ),
-                    default=None,
-                ),
-            ),
-        }
+        return BATTING_AVERAGE
 
 
 class BattingAverageCareerView(BattingAverageMixin, CareerStatistic):
@@ -72,15 +65,7 @@ class BattingHundredsMixin:
     @classmethod
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
-        hundreds = (
-            Hundred.objects.filter(statistic=OuterRef("pk"))
-            .order_by()
-            .values("statistic")
-            .annotate(hund=Count("*"))
-            .values("hund")
-        )
-
-        return {"hundreds__count": Sum(Subquery(hundreds, output_field=IntegerField()))}
+        return HUNDREDS
 
 
 class HundredsCareerView(BattingHundredsMixin, CareerStatistic):
