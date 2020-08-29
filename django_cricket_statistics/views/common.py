@@ -1,9 +1,8 @@
 """Views for statistics."""
 
-from abc import ABC
-from typing import Callable, Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
-from django.db.models import Expression, F, Model, QuerySet, Sum
+from django.db.models import Expression, Model, QuerySet
 from django.views.generic import ListView
 
 from django_cricket_statistics.models import Statistic
@@ -56,8 +55,10 @@ def create_queryset(
     filters: Optional[Dict] = None,
 ) -> QuerySet:
     """Create a queryset by applying filters, grouping, aggregation."""
-    assert model is not None
-    queryset = model.objects.all()
+    assert model is Statistic
+
+    # only permit senior records to be included
+    queryset = model.objects.filter(grade__is_senior=True)
 
     queryset = queryset.filter(**pre_filters) if pre_filters else queryset
 
@@ -76,21 +77,13 @@ def create_queryset(
     return queryset
 
 
-class AggregatorMixinABC(ABC):
-    """Abstract base class for aggregator attribute."""
-
-    aggregator: Callable
-
-
-class SeasonStatistic(AggregatorMixinABC, PlayerStatisticView):
+class SeasonStatistic(PlayerStatisticView):
     """Display statistics for each season."""
 
     group_by = ("player", "season")
-    aggregator = F
 
 
-class CareerStatistic(AggregatorMixinABC, PlayerStatisticView):
+class CareerStatistic(PlayerStatisticView):
     """Display all statistics for a given player."""
 
     group_by = ("player",)
-    aggregator = Sum

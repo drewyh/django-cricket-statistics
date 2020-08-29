@@ -5,11 +5,7 @@ from typing import Dict
 from django.db.models import Case, Count, F, IntegerField, OuterRef, Subquery, Sum, When
 
 from django_cricket_statistics.models import FiveWicketInning, BALLS_PER_OVER
-from django_cricket_statistics.views.common import (
-    CareerStatistic,
-    SeasonStatistic,
-    AggregatorMixinABC,
-)
+from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
 
 
 class WicketsCareerView(CareerStatistic):
@@ -25,7 +21,7 @@ class WicketsSeasonView(SeasonStatistic):
     ordering = "-wickets"
 
 
-class BowlingAverageMixin(AggregatorMixinABC):
+class BowlingAverageMixin:
     """Mixin for calculating bowling average."""
 
     ordering = "bowling_average"
@@ -34,8 +30,8 @@ class BowlingAverageMixin(AggregatorMixinABC):
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
         return {
-            "bowling_runs__sum": cls.aggregator("bowling_runs"),
-            "bowling_wickets__sum": cls.aggregator("bowling_wickets"),
+            "bowling_runs__sum": Sum("bowling_runs"),
+            "bowling_wickets__sum": Sum("bowling_wickets"),
             "bowling_average": (
                 Case(
                     When(
@@ -56,7 +52,7 @@ class BowlingAverageSeasonView(BowlingAverageMixin, SeasonStatistic):
     """Best season bowling average."""
 
 
-class BowlingEconomyRateMixin(AggregatorMixinABC):
+class BowlingEconomyRateMixin:
     """Mixin for calculating bowling economy rate."""
 
     ordering = "bowling_economy_rate"
@@ -65,8 +61,8 @@ class BowlingEconomyRateMixin(AggregatorMixinABC):
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
         return {
-            "bowling_balls__sum": cls.aggregator("bowling_balls"),
-            "bowling_runs__sum": cls.aggregator("bowling_runs"),
+            "bowling_balls__sum": Sum("bowling_balls"),
+            "bowling_runs__sum": Sum("bowling_runs"),
             "bowling_economy_rate": (
                 Case(
                     When(
@@ -89,7 +85,7 @@ class BowlingEconomyRateSeasonView(BowlingEconomyRateMixin, SeasonStatistic):
     """Best season bowling economy rate."""
 
 
-class BowlingStrikeRateMixin(AggregatorMixinABC):
+class BowlingStrikeRateMixin:
     """Mixin for calculating bowling strike rate."""
 
     ordering = "bowling_strike_rate"
@@ -98,8 +94,8 @@ class BowlingStrikeRateMixin(AggregatorMixinABC):
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
         return {
-            "bowling_wickets__sum": cls.aggregator("bowling_wickets"),
-            "bowling_balls__sum": cls.aggregator("bowling_balls"),
+            "bowling_wickets__sum": Sum("bowling_wickets"),
+            "bowling_balls__sum": Sum("bowling_balls"),
             "bowling_strike_rate": (
                 Case(
                     When(
@@ -128,7 +124,7 @@ class BestBowlingInningsView(CareerStatistic):
     ordering = ("-best_bowling_wickets", "best_bowling_runs", "grade", "-season")
 
 
-class BowlingFiveWicketInningsMixin(AggregatorMixinABC):
+class BowlingFiveWicketInningsMixin:
     """Mixin for counting five wicket innings."""
 
     ordering = "-five_wicket_innings__count"
@@ -144,7 +140,7 @@ class BowlingFiveWicketInningsMixin(AggregatorMixinABC):
         )
 
         return {
-            "five_wicket_innings___count": cls.aggregator(
+            "five_wicket_innings___count": Sum(
                 Subquery(five_wicket_innings, output_field=IntegerField())
             )
         }

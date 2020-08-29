@@ -5,11 +5,7 @@ from typing import Dict
 from django.db.models import Case, Count, F, IntegerField, OuterRef, Subquery, Sum, When
 
 from django_cricket_statistics.models import Hundred
-from django_cricket_statistics.views.common import (
-    CareerStatistic,
-    SeasonStatistic,
-    AggregatorMixinABC,
-)
+from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
 
 
 class BattingRunsCareerView(CareerStatistic):
@@ -22,10 +18,11 @@ class BattingRunsCareerView(CareerStatistic):
 class BattingRunsSeasonView(SeasonStatistic):
     """Most batting runs in a season."""
 
+    aggregates = Sum("batting_runs")
     ordering = "-batting_runs"
 
 
-class BattingAverageMixin(AggregatorMixinABC):
+class BattingAverageMixin:
     """Mixin for calculating batting average."""
 
     ordering = "-batting_average"
@@ -34,9 +31,8 @@ class BattingAverageMixin(AggregatorMixinABC):
     def get_aggregates(cls) -> Dict:
         """Return the required aggregate values for annotation."""
         return {
-            "batting_outs__sum": cls.aggregator("batting_innings")
-            - cls.aggregator("batting_not_outs"),
-            "batting_runs__sum": cls.aggregator("batting_runs"),
+            "batting_outs__sum": Sum("batting_innings") - Sum("batting_not_outs"),
+            "batting_runs__sum": Sum("batting_runs"),
             "batting_average": (
                 Case(
                     When(
@@ -68,7 +64,7 @@ class BestBattingInningsView(CareerStatistic):
     )
 
 
-class BattingHundredsMixin(AggregatorMixinABC):
+class BattingHundredsMixin:
     """Mixin for counting hundreds."""
 
     ordering = "-hundreds__count"
@@ -84,11 +80,7 @@ class BattingHundredsMixin(AggregatorMixinABC):
             .values("hund")
         )
 
-        return {
-            "hundreds__count": cls.aggregator(
-                Subquery(hundreds, output_field=IntegerField())
-            )
-        }
+        return {"hundreds__count": Sum(Subquery(hundreds, output_field=IntegerField()))}
 
 
 class HundredsCareerView(BattingHundredsMixin, CareerStatistic):
