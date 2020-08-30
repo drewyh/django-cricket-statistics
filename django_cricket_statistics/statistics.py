@@ -129,3 +129,23 @@ ALL_STATISTICS = {
     # **WICKETKEEPING_STUMPINGS,
     # **FIELDING_CATCHES,
 }
+ALL_STATISTIC_NAMES = {
+    "number_of_matches__sum": "Mat",
+    "batting_innings__sum": "Inns",
+    "batting_runs__sum": "Runs",
+    "batting_not_outs__sum": "NO",
+    "batting_average": "Ave",
+    # "batting_best_innings": "HS",
+    "hundreds": "100",
+    "bowling_balls__sum": "Balls",
+    "bowling_runs__sum": "Runs",
+    "bowling_wickets__sum": "Wkts",
+    "bowling_average": "Ave",
+    "bowling_economy": "Econ",
+    "bowling_strike_rate": "SR",
+    # "bowling_best_innings": "BB",
+    "five_wicket_innings": "5WI",
+    # "wicketkeeping_catches__sum": "WK Ct",
+    # "wicketkeeping_stumpings__sum": "WK St",
+    # "fielding_catches__sum": "Ct",
+}
