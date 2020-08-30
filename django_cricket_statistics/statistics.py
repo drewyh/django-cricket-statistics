@@ -4,6 +4,16 @@ from django.db.models import Case, Count, F, IntegerField, OuterRef, Subquery, S
 
 from django_cricket_statistics.models import Hundred, FiveWicketInning, BALLS_PER_OVER
 
+# overall
+MATCHES = {"number_of_matches__sum": Sum("number_of_matches")}
+SEASON_RANGE = {
+    "start_year": Min("season__year"),
+    "end_year": Max("season__year") + 1,
+    "season_range": Concat(
+        F("first_year"), Value("-"), F("last_year"), output_field=CharField()
+    ),
+}
+
 # batting statistics
 BATTING_RUNS = {"batting_runs__sum": Sum("batting_runs")}
 BATTING_INNINGS = {"batting_innings__sum": Sum("batting_innings")}
@@ -26,6 +36,7 @@ BATTING_AVERAGE = {
         ),
     ),
 }
+# BATTING_BEST_INNINGS = {}
 HUNDREDS_SUBQUERY = (
     Hundred.objects.filter(statistic=OuterRef("pk"))
     .order_by()
@@ -37,6 +48,7 @@ HUNDREDS = {"hundreds": Sum(Subquery(HUNDREDS_SUBQUERY, output_field=IntegerFiel
 
 
 # bowling statistics
+BOWLING_BALLS = {"bowling_balls__sum": Sum("bowling_balls")}
 BOWLING_RUNS = {"bowling_runs__sum": Sum("bowling_runs")}
 BOWLING_WICKETS = {"bowling_wickets__sum": Sum("bowling_wickets")}
 BOWLING_AVERAGE = {
@@ -52,7 +64,6 @@ BOWLING_AVERAGE = {
         ),
     ),
 }
-BOWLING_BALLS = {"bowling_balls__sum": Sum("bowling_balls")}
 BOWLING_ECONOMY_RATE = {
     **BOWLING_RUNS,
     **BOWLING_BALLS,
@@ -81,6 +92,7 @@ BOWLING_STRIKE_RATE = {
         ),
     ),
 }
+# BOWLING_BEST_INNINGS = {}
 FIVE_WICKET_INNINGS_SUBQUERY = (
     FiveWicketInning.objects.filter(statistic=OuterRef("pk"))
     .values("statistic")
@@ -91,4 +103,29 @@ FIVE_WICKET_INNINGS = {
     "five_wicket_innings": Sum(
         Subquery(FIVE_WICKET_INNINGS_SUBQUERY, output_field=IntegerField())
     )
+}
+# WICKETKEEPING_CATCHES = {}
+# WICKETKEEPING_STUMPINGS = {}
+# FIELDING_CATCHES = {}
+
+# helper to get all statistics for a given queryset
+ALL_STATISTICS = {
+    **MATCHES,
+    **BATTING_INNINGS,
+    **BATTING_RUNS,
+    **BATTING_NOT_OUTS,
+    **BATTING_AVERAGE,
+    # **BATTING_BEST_INNINGS,
+    **HUNDREDS,
+    **BOWLING_BALLS,
+    **BOWLING_RUNS,
+    **BOWLING_WICKETS,
+    **BOWLING_AVERAGE,
+    **BOWLING_ECONOMY_RATE,
+    **BOWLING_STRIKE_RATE,
+    # **BOWLING_BEST_INNINGS,
+    **FIVE_WICKET_INNINGS,
+    # **WICKETKEEPING_CATCHES,
+    # **WICKETKEEPING_STUMPINGS,
+    # **FIELDING_CATCHES,
 }
