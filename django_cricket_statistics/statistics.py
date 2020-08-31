@@ -1,6 +1,20 @@
 """Queries for calculating standard statistics."""
 
-from django.db.models import Case, Count, F, IntegerField, OuterRef, Subquery, Sum, When
+from django.db.models import (
+    Case,
+    CharField,
+    Count,
+    F,
+    IntegerField,
+    Max,
+    Min,
+    OuterRef,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
+from django.db.models.functions import Concat
 
 from django_cricket_statistics.models import Hundred, FiveWicketInning, BALLS_PER_OVER
 

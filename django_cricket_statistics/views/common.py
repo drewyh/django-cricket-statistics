@@ -2,7 +2,7 @@
 
 from typing import Dict, Optional, Tuple
 
-from django.db.models import Model, QuerySet
+from django.db.models import QuerySet
 from django.views.generic import ListView
 
 from django_cricket_statistics.models import Statistic
@@ -31,7 +31,6 @@ class PlayerStatisticView(ListView):
         filters = self.filters or {}
 
         return create_queryset(
-            model=self.model,
             pre_filters=pre_filters,
             group_by=self.group_by,
             aggregates=aggregates,
@@ -40,7 +39,6 @@ class PlayerStatisticView(ListView):
 
 
 def create_queryset(
-    model: Optional[Model] = None,
     pre_filters: Optional[Dict] = None,
     group_by: Optional[Tuple] = None,
     aggregates: Optional[Dict] = None,
@@ -48,10 +46,8 @@ def create_queryset(
     select_related: Optional[Tuple] = ("player",),
 ) -> QuerySet:
     """Create a queryset by applying filters, grouping, aggregation."""
-    assert model is Statistic
-
     # only permit senior records to be included
-    queryset = model.objects.filter(grade__is_senior=True)
+    queryset = Statistic.objects.filter(grade__is_senior=True)
 
     queryset = queryset.filter(**pre_filters) if pre_filters else queryset
 
