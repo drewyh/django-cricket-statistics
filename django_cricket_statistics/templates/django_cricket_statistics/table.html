@@ -1,0 +1,18 @@
+<table>
+  <thead>
+    <tr>
+      {% for attr, name in columns %}
+      <th>{{ name }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in data %}
+    <tr>
+    {% for attr, name in columns %}
+      <td>{{ data.getattr(attr) | floatformat:2 }}</td>
+    {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
