@@ -37,6 +37,9 @@ class PlayerStatisticView(ListView):
             filters=filters,
         )
 
+    def get_context_data(self, **kwargs: str):
+        context = super().get_context_data(**kwargs)
+
 
 def create_queryset(
     pre_filters: Optional[Dict] = None,
@@ -51,12 +54,12 @@ def create_queryset(
 
     queryset = queryset.filter(**pre_filters) if pre_filters else queryset
 
-    # group the results for aggregation
-    queryset = queryset.values(*group_by) if group_by else queryset
-
     # the associated player is always required
     if select_related:
         queryset = queryset.select_related(*select_related)
+
+    # group the results for aggregation
+    queryset = queryset.values(*group_by) if group_by else queryset
 
     # annotate the required values
     queryset = queryset.annotate(**aggregates) if aggregates else queryset

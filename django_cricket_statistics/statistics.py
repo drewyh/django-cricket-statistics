@@ -24,30 +24,28 @@ SEASON_RANGE = {
     "start_year": Min("season__year"),
     "end_year": Max("season__year") + 1,
     "season_range": Concat(
-        F("first_year"), Value("-"), F("last_year"), output_field=CharField()
+        F("start_year"), Value("-"), F("end_year"), output_field=CharField()
     ),
 }
 
 # batting statistics
-BATTING_RUNS = {"batting_runs__sum": Sum("batting_runs")}
+BATTING_RUNS = {"batting_aggregate__sum": Sum("batting_aggregate")}
 BATTING_INNINGS = {"batting_innings__sum": Sum("batting_innings")}
 BATTING_NOT_OUTS = {"batting_not_outs__sum": Sum("batting_not_outs")}
 BATTING_OUTS = {
     **BATTING_INNINGS,
     **BATTING_NOT_OUTS,
-    "batting_outs__sum": F("batting_innings__sum") - F("batting_outs__sum"),
+    "batting_outs__sum": F("batting_innings__sum") - F("batting_not_outs__sum"),
 }
 BATTING_AVERAGE = {
     **BATTING_RUNS,
     **BATTING_OUTS,
-    "batting_average": (
-        Case(
-            When(
-                batting_outs__sum__gt=0,
-                then=F("batting_runs__sum") / F("batting_outs__sum"),
-            ),
-            default=None,
+    "batting_average": Case(
+        When(
+            batting_outs__sum__gt=0,
+            then=F("batting_aggregate__sum") / F("batting_outs__sum"),
         ),
+        default=None,
     ),
 }
 # BATTING_BEST_INNINGS = {}
@@ -68,42 +66,34 @@ BOWLING_WICKETS = {"bowling_wickets__sum": Sum("bowling_wickets")}
 BOWLING_AVERAGE = {
     **BOWLING_RUNS,
     **BOWLING_WICKETS,
-    "bowling_average": (
-        Case(
-            When(
-                bowling_wickets__sum__gt=0,
-                then=F("bowling_runs__sum") / F("bowling_wickets__sum"),
-            ),
-            default=None,
+    "bowling_average": Case(
+        When(
+            bowling_wickets__sum__gt=0,
+            then=F("bowling_runs__sum") / F("bowling_wickets__sum"),
         ),
+        default=None,
     ),
 }
 BOWLING_ECONOMY_RATE = {
     **BOWLING_RUNS,
     **BOWLING_BALLS,
-    "bowling_economy_rate": (
-        Case(
-            When(
-                bowling_balls__sum__gt=0,
-                then=F("bowling_runs__sum") / F("bowling_balls__sum") * BALLS_PER_OVER,
-            ),
-            default=None,
+    "bowling_economy_rate": Case(
+        When(
+            bowling_balls__sum__gt=0,
+            then=F("bowling_runs__sum") / F("bowling_balls__sum") * BALLS_PER_OVER,
         ),
+        default=None,
     ),
 }
 BOWLING_STRIKE_RATE = {
     **BOWLING_WICKETS,
     **BOWLING_BALLS,
-    "bowling_strike_rate": (
-        Case(
-            When(
-                bowling_wickets__sum__gt=0,
-                then=F("bowling_wickets__sum")
-                / F("bowling_balls__sum")
-                * BALLS_PER_OVER,
-            ),
-            default=None,
+    "bowling_strike_rate": Case(
+        When(
+            bowling_wickets__sum__gt=0,
+            then=F("bowling_wickets__sum") / F("bowling_balls__sum") * BALLS_PER_OVER,
         ),
+        default=None,
     ),
 }
 # BOWLING_BEST_INNINGS = {}
@@ -146,7 +136,7 @@ ALL_STATISTICS = {
 ALL_STATISTIC_NAMES = {
     "number_of_matches__sum": "Mat",
     "batting_innings__sum": "Inns",
-    "batting_runs__sum": "Runs",
+    "batting_aggregate__sum": "Runs",
     "batting_not_outs__sum": "NO",
     "batting_average": "Ave",
     # "batting_best_innings": "HS",

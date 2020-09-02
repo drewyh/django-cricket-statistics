@@ -2,10 +2,12 @@
 
 from typing import Dict
 
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 from django.views.generic import DetailView
 
 from django_cricket_statistics.models import FiveWicketInning, Hundred, Player
-from django_cricket_statistics.statistics import ALL_STATISTICS, SEASON_RANGE
+from django_cricket_statistics.statistics import ALL_STATISTICS, ALL_STATISTIC_NAMES, SEASON_RANGE
 from django_cricket_statistics.views.common import create_queryset
 
 
@@ -18,18 +20,23 @@ class PlayerCareerView(DetailView):
         """Return the required context data."""
         context = super().get_context_data(**kwargs)
 
+        # retrieve the object primary key
+        pk = self.kwargs.get(self.pk_url_kwarg)
+
         # add all career statistics
         career_statistics = create_queryset(
-            pre_filters={"player__id": self.object.id},
+            pre_filters={"player__pk": pk},
             group_by=("player",),
             aggregates={**SEASON_RANGE, **ALL_STATISTICS},
         )
         # this won't have a grade annotation so we add one
-        statistics_career.grade = "All"
+        career_statistics.grade = "All"
+
+        context["career"] = career_statistics.get()
 
         # add career statistics by grade
         statistics_by_grade = create_queryset(
-            pre_filters={"player__id": self.object.id},
+            pre_filters={"player__pk": pk},
             group_by=("player", "grade"),
             aggregates={**SEASON_RANGE, **ALL_STATISTICS},
             select_related=("player", "grade"),
@@ -37,7 +44,7 @@ class PlayerCareerView(DetailView):
 
         # this will evaluate the queryset immediately since we make it a list
         context["statistics_by_grade_list"] = [
-            statistics_career,
+            career_statistics,
             *list(statistics_by_grade),
         ]
 
@@ -46,7 +53,7 @@ class PlayerCareerView(DetailView):
 
         # add career statistics by year
         context["statistics_by_year_list"] = create_queryset(
-            pre_filters={"player__id": self.object.id},
+            pre_filters={"player__pk": pk},
             group_by=("player", "season"),
             aggregates=ALL_STATISTICS,
             select_related=("player", "season"),
@@ -60,7 +67,7 @@ class PlayerCareerView(DetailView):
 
         # add hundreds
         context["hundreds_list"] = Hundred.objects.filter(
-            statistic__player__id=self.object.id, statistic__grade__is_senior=True
+            statistic__player__pk=pk, statistic__grade__is_senior=True
         ).annotate(
             rank=Window(
                 expression=Rank(),
@@ -82,7 +89,7 @@ class PlayerCareerView(DetailView):
 
         # add five wicket innings
         context["five_wicket_innings_list"] = FiveWicketInning.objects.filter(
-            statistic__player__id=self.object.id, statistic__grade__is_senior=True
+            statistic__player__pk=pk, statistic__grade__is_senior=True
         ).annotate(
             rank=Window(
                 expression=Rank(),
