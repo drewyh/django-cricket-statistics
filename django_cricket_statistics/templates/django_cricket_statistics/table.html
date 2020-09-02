@@ -1,7 +1,7 @@
 <table>
   <thead>
     <tr>
-      {% for attr, name in columns %}
+      {% for attr, name in columns.items %}
       <th>{{ name }}</th>
       {% endfor %}
     </tr>
@@ -9,7 +9,7 @@
   <tbody>
     {% for item in data %}
     <tr>
-    {% for attr, name in columns %}
+    {% for attr, name in columns.items %}
       <td>{{ data.getattr(attr) | floatformat:2 }}</td>
     {% endfor %}
     </tr>
