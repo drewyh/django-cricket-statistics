@@ -31,7 +31,7 @@ SEASON_RANGE = {
 }
 
 # batting statistics
-BATTING_RUNS = {"batting_aggregate__sum": Sum("batting_aggregate")}
+BATTING_RUNS = {"batting_runs__sum": Sum("batting_runs")}
 BATTING_INNINGS = {"batting_innings__sum": Sum("batting_innings")}
 BATTING_NOT_OUTS = {"batting_not_outs__sum": Sum("batting_not_outs")}
 BATTING_OUTS = {
@@ -46,7 +46,7 @@ BATTING_AVERAGE = {
         Case(
             When(
                 batting_outs__sum__gt=0,
-                then=Cast(F("batting_aggregate__sum"), FloatField())
+                then=Cast(F("batting_runs__sum"), FloatField())
                 / Cast(F("batting_outs__sum"), FloatField()),
             ),
             default=None,
@@ -155,7 +155,7 @@ ALL_STATISTICS = {
 ALL_STATISTIC_NAMES = {
     "number_of_matches__sum": "Mat",
     "batting_innings__sum": "Inns",
-    "batting_aggregate__sum": "Runs",
+    "batting_runs__sum": "Runs",
     "batting_not_outs__sum": "NO",
     "batting_average": "Ave",
     # "batting_best_innings": "HS",
