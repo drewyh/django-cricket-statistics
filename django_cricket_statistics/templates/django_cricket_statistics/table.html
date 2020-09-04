@@ -1,3 +1,4 @@
+{% load getattr %}
 <table>
   <thead>
     <tr>
@@ -10,7 +11,17 @@
     {% for item in data %}
     <tr>
     {% for attr, name in columns.items %}
-      <td>{{ data.getattr(attr) | floatformat:2 }}</td>
+    {% with item|get:attr as value %}
+    {% spaceless %}
+      <td>
+        {% if attr in columns_float %}
+        {{ value|floatformat:2 }}
+        {% else %}
+        {{ value }}
+        {% endif %}
+      </td>
+    {% endspaceless %}
+    {% endwith %}
     {% endfor %}
     </tr>
     {% endfor %}

@@ -4,7 +4,9 @@ from django.db.models import (
     Case,
     CharField,
     Count,
+    ExpressionWrapper,
     F,
+    FloatField,
     IntegerField,
     Max,
     Min,
@@ -14,7 +16,7 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Concat
+from django.db.models.functions import Cast, Concat
 
 from django_cricket_statistics.models import Hundred, FiveWicketInning, BALLS_PER_OVER
 
@@ -40,12 +42,16 @@ BATTING_OUTS = {
 BATTING_AVERAGE = {
     **BATTING_RUNS,
     **BATTING_OUTS,
-    "batting_average": Case(
-        When(
-            batting_outs__sum__gt=0,
-            then=F("batting_aggregate__sum") / F("batting_outs__sum"),
+    "batting_average": ExpressionWrapper(
+        Case(
+            When(
+                batting_outs__sum__gt=0,
+                then=Cast(F("batting_aggregate__sum"), FloatField())
+                / Cast(F("batting_outs__sum"), FloatField()),
+            ),
+            default=None,
         ),
-        default=None,
+        output_field=FloatField(),
     ),
 }
 # BATTING_BEST_INNINGS = {}
@@ -66,34 +72,47 @@ BOWLING_WICKETS = {"bowling_wickets__sum": Sum("bowling_wickets")}
 BOWLING_AVERAGE = {
     **BOWLING_RUNS,
     **BOWLING_WICKETS,
-    "bowling_average": Case(
-        When(
-            bowling_wickets__sum__gt=0,
-            then=F("bowling_runs__sum") / F("bowling_wickets__sum"),
+    "bowling_average": ExpressionWrapper(
+        Case(
+            When(
+                bowling_wickets__sum__gt=0,
+                then=Cast(F("bowling_runs__sum"), FloatField())
+                / Cast(F("bowling_wickets__sum"), FloatField()),
+            ),
+            default=None,
         ),
-        default=None,
+        output_field=FloatField(),
     ),
 }
 BOWLING_ECONOMY_RATE = {
     **BOWLING_RUNS,
     **BOWLING_BALLS,
-    "bowling_economy_rate": Case(
-        When(
-            bowling_balls__sum__gt=0,
-            then=F("bowling_runs__sum") / F("bowling_balls__sum") * BALLS_PER_OVER,
+    "bowling_economy_rate": ExpressionWrapper(
+        Case(
+            When(
+                bowling_balls__sum__gt=0,
+                then=Cast(F("bowling_runs__sum"), FloatField())
+                / Cast(F("bowling_balls__sum"), FloatField())
+                * BALLS_PER_OVER,
+            ),
+            default=None,
         ),
-        default=None,
+        output_field=FloatField(),
     ),
 }
 BOWLING_STRIKE_RATE = {
     **BOWLING_WICKETS,
     **BOWLING_BALLS,
-    "bowling_strike_rate": Case(
-        When(
-            bowling_wickets__sum__gt=0,
-            then=F("bowling_wickets__sum") / F("bowling_balls__sum") * BALLS_PER_OVER,
+    "bowling_strike_rate": ExpressionWrapper(
+        Case(
+            When(
+                bowling_balls__sum__gt=0,
+                then=Cast(F("bowling_balls__sum"), FloatField())
+                / Cast(F("bowling_wickets__sum"), FloatField()),
+            ),
+            default=None,
         ),
-        default=None,
+        output_field=FloatField(),
     ),
 }
 # BOWLING_BEST_INNINGS = {}
@@ -120,7 +139,7 @@ ALL_STATISTICS = {
     **BATTING_NOT_OUTS,
     **BATTING_AVERAGE,
     # **BATTING_BEST_INNINGS,
-    **HUNDREDS,
+    # **HUNDREDS,
     **BOWLING_BALLS,
     **BOWLING_RUNS,
     **BOWLING_WICKETS,
@@ -128,7 +147,7 @@ ALL_STATISTICS = {
     **BOWLING_ECONOMY_RATE,
     **BOWLING_STRIKE_RATE,
     # **BOWLING_BEST_INNINGS,
-    **FIVE_WICKET_INNINGS,
+    # **FIVE_WICKET_INNINGS,
     # **WICKETKEEPING_CATCHES,
     # **WICKETKEEPING_STUMPINGS,
     # **FIELDING_CATCHES,
@@ -140,16 +159,22 @@ ALL_STATISTIC_NAMES = {
     "batting_not_outs__sum": "NO",
     "batting_average": "Ave",
     # "batting_best_innings": "HS",
-    "hundreds": "100",
+    # "hundreds": "100",
     "bowling_balls__sum": "Balls",
     "bowling_runs__sum": "Runs",
     "bowling_wickets__sum": "Wkts",
     "bowling_average": "Ave",
-    "bowling_economy": "Econ",
+    "bowling_economy_rate": "Econ",
     "bowling_strike_rate": "SR",
     # "bowling_best_innings": "BB",
-    "five_wicket_innings": "5WI",
+    # "five_wicket_innings": "5WI",
     # "wicketkeeping_catches__sum": "WK Ct",
     # "wicketkeeping_stumpings__sum": "WK St",
     # "fielding_catches__sum": "Ct",
+}
+ALL_STATISTIC_FLOATS = {
+    "batting_average",
+    "bowling_average",
+    "bowling_economy_rate",
+    "bowling_strike_rate",
 }

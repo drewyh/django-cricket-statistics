@@ -7,7 +7,12 @@ from django.db.models.functions import Rank
 from django.views.generic import DetailView
 
 from django_cricket_statistics.models import FiveWicketInning, Hundred, Player
-from django_cricket_statistics.statistics import ALL_STATISTICS, ALL_STATISTIC_NAMES, SEASON_RANGE
+from django_cricket_statistics.statistics import (
+    ALL_STATISTICS,
+    ALL_STATISTIC_NAMES,
+    ALL_STATISTIC_FLOATS,
+    SEASON_RANGE,
+)
 from django_cricket_statistics.views.common import create_queryset
 
 
@@ -26,20 +31,20 @@ class PlayerCareerView(DetailView):
         # add all career statistics
         career_statistics = create_queryset(
             pre_filters={"player__pk": pk},
-            group_by=("player",),
-            aggregates={**SEASON_RANGE, **ALL_STATISTICS},
-        )
-        # this won't have a grade annotation so we add one
-        career_statistics.grade = "All"
+            group_by=("player__pk",),
+            aggregates={**ALL_STATISTICS},
+            select_related=("player",),
+        ).get()
 
-        context["career"] = career_statistics.get()
+        # this won't have a grade annotation so we add one
+        career_statistics["grade"] = "All"
 
         # add career statistics by grade
         statistics_by_grade = create_queryset(
-            pre_filters={"player__pk": pk},
-            group_by=("player", "grade"),
-            aggregates={**SEASON_RANGE, **ALL_STATISTICS},
-            select_related=("player", "grade"),
+           pre_filters={"player__pk": pk},
+           group_by=("player__pk", "grade__pk"),
+           aggregates={**SEASON_RANGE, **ALL_STATISTICS},
+           select_related=("player", "grade"),
         )
 
         # this will evaluate the queryset immediately since we make it a list
@@ -52,12 +57,12 @@ class PlayerCareerView(DetailView):
         context["statistics_by_grade_names"] = {"grade": "Grade", **ALL_STATISTIC_NAMES}
 
         # add career statistics by year
-        context["statistics_by_year_list"] = create_queryset(
-            pre_filters={"player__pk": pk},
-            group_by=("player", "season"),
-            aggregates=ALL_STATISTICS,
-            select_related=("player", "season"),
-        )
+        # context["statistics_by_year_list"] = create_queryset(
+        #    pre_filters={"player__pk": pk},
+        #    group_by=("player__pk", "season__pk"),
+        #    aggregates=ALL_STATISTICS,
+        #    select_related=("player", "season"),
+        # )
 
         # add display names for this table
         context["statistics_by_year_names"] = {
@@ -65,48 +70,50 @@ class PlayerCareerView(DetailView):
             **ALL_STATISTIC_NAMES,
         }
 
-        # add hundreds
-        context["hundreds_list"] = Hundred.objects.filter(
-            statistic__player__pk=pk, statistic__grade__is_senior=True
-        ).annotate(
-            rank=Window(
-                expression=Rank(),
-                order_by=[
-                    F("runs").desc(),
-                    F("is_not_out").desc(),
-                    F("is_in_final").desc(),
-                ],
-            )
-        )
+        context["statistics_float_fields"] = ALL_STATISTIC_FLOATS
 
-        # add display names for this table
-        context["hundreds_names"] = {
-            "rank": "#",
-            "season": "Season",
-            "grade": "Grade",
-            "score": "Score",
-        }
+        # # add hundreds
+        # context["hundreds_list"] = Hundred.objects.filter(
+        #     statistic__player__pk=pk, statistic__grade__is_senior=True
+        # ).annotate(
+        #     rank=Window(
+        #         expression=Rank(),
+        #         order_by=[
+        #             F("runs").desc(),
+        #             F("is_not_out").desc(),
+        #             F("is_in_final").desc(),
+        #         ],
+        #     )
+        # )
 
-        # add five wicket innings
-        context["five_wicket_innings_list"] = FiveWicketInning.objects.filter(
-            statistic__player__pk=pk, statistic__grade__is_senior=True
-        ).annotate(
-            rank=Window(
-                expression=Rank(),
-                order_by=[
-                    F("wickets").desc(),
-                    F("runs").asc(),
-                    F("is_in_final").desc(),
-                ],
-            )
-        )
+        # # add display names for this table
+        # context["hundreds_names"] = {
+        #     "rank": "#",
+        #     "season": "Season",
+        #     "grade": "Grade",
+        #     "score": "Score",
+        # }
 
-        # add display names for this table
-        context["five_wicket_innings_names"] = {
-            "rank": "#",
-            "season": "Season",
-            "grade": "Grade",
-            "figures": "Figures",
-        }
+        # # add five wicket innings
+        # context["five_wicket_innings_list"] = FiveWicketInning.objects.filter(
+        #     statistic__player__pk=pk, statistic__grade__is_senior=True
+        # ).annotate(
+        #     rank=Window(
+        #         expression=Rank(),
+        #         order_by=[
+        #             F("wickets").desc(),
+        #             F("runs").asc(),
+        #             F("is_in_final").desc(),
+        #         ],
+        #     )
+        # )
+
+        # # add display names for this table
+        # context["five_wicket_innings_names"] = {
+        #     "rank": "#",
+        #     "season": "Season",
+        #     "grade": "Grade",
+        #     "figures": "Figures",
+        # }
 
         return context

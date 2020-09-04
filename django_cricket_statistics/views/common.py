@@ -50,13 +50,16 @@ def create_queryset(
 ) -> QuerySet:
     """Create a queryset by applying filters, grouping, aggregation."""
     # only permit senior records to be included
-    queryset = Statistic.objects.filter(grade__is_senior=True)
+    queryset = Statistic.objects.filter(grade__is_senior=True).order_by()
 
     queryset = queryset.filter(**pre_filters) if pre_filters else queryset
 
     # the associated player is always required
     if select_related:
         queryset = queryset.select_related(*select_related)
+
+    # we need to include the select related in values
+    #group_by = [*select_related, *group_by]
 
     # group the results for aggregation
     queryset = queryset.values(*group_by) if group_by else queryset
