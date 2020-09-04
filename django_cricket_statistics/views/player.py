@@ -42,7 +42,7 @@ class PlayerCareerView(DetailView):
         # add career statistics by grade
         statistics_by_grade = create_queryset(
            pre_filters={"player__pk": pk},
-           group_by=("player__pk", "grade__pk"),
+           group_by=("player", "grade"),
            aggregates={**SEASON_RANGE, **ALL_STATISTICS},
            select_related=("player", "grade"),
         )
@@ -57,12 +57,12 @@ class PlayerCareerView(DetailView):
         context["statistics_by_grade_names"] = {"grade": "Grade", **ALL_STATISTIC_NAMES}
 
         # add career statistics by year
-        # context["statistics_by_year_list"] = create_queryset(
-        #    pre_filters={"player__pk": pk},
-        #    group_by=("player__pk", "season__pk"),
-        #    aggregates=ALL_STATISTICS,
-        #    select_related=("player", "season"),
-        # )
+        context["statistics_by_year_list"] = create_queryset(
+           pre_filters={"player__pk": pk},
+           group_by=("player", "season"),
+           aggregates=ALL_STATISTICS,
+           select_related=("player", "season"),
+        )
 
         # add display names for this table
         context["statistics_by_year_names"] = {
