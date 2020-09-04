@@ -8,3 +8,5 @@ from django_cricket_statistics.views.fielding import *
 from django_cricket_statistics.views.misc import *
 
 from django_cricket_statistics.views.player import *
+
+from django_cricket_statistics.views.statistic_index import *

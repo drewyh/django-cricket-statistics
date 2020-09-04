@@ -8,14 +8,18 @@ class BattingRunsCareerView(CareerStatistic):
     """Most career batting runs."""
 
     aggregates = BATTING_RUNS
-    ordering = "-batting_runs__sum"
+    ordering = "-batting_aggregate__sum"
+    filters = {"batting_aggregate__sum__gt": 0}
+    columns_extra = {"batting_aggregate__sum": "Runs"}
 
 
 class BattingRunsSeasonView(SeasonStatistic):
     """Most batting runs in a season."""
 
     aggregates = BATTING_RUNS
-    ordering = "-batting_runs__sum"
+    ordering = "-batting_aggregate__sum"
+    filters = {"batting_aggregate__sum__gt": 0}
+    columns_extra = {"batting_aggregate__sum": "Runs"}
 
 
 class BattingAverageCareerView(CareerStatistic):
@@ -23,6 +27,8 @@ class BattingAverageCareerView(CareerStatistic):
 
     aggregates = BATTING_AVERAGE
     ordering = "-batting_average"
+    filters = {"batting_innings__sum__gte": 20}
+    columns_extra = {"batting_average": "Ave"}
 
 
 class BattingAverageSeasonView(SeasonStatistic):
@@ -31,6 +37,7 @@ class BattingAverageSeasonView(SeasonStatistic):
     aggregates = BATTING_AVERAGE
     ordering = "-batting_average"
     filters = {"batting_aggregate__sum__gte": 200, "batting_innings__sum__gte": 9}
+    columns_extra = {"batting_average": "Ave"}
 
 
 class BattingBestInningsView(CareerStatistic):
@@ -48,11 +55,15 @@ class BattingHundredsCareerView(CareerStatistic):
     """Number of career hundreds."""
 
     aggregates = HUNDREDS
-    ordering = "-hundreds__count"
+    ordering = "-hundreds"
+    filters = {"hundreds__gt": 0}
+    columns_extra = {"hundreds": "Hundreds"}
 
 
-class BattingHundredsSeasonView(CareerStatistic):
+class BattingHundredsSeasonView(SeasonStatistic):
     """Number of season hundreds."""
 
     aggregates = HUNDREDS
-    ordering = "-hundreds__count"
+    ordering = "-hundreds"
+    filters = {"hundreds__gt": 0}
+    columns_extra = {"hundreds": "Hundreds"}

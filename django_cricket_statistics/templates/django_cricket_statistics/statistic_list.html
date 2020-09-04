@@ -1,4 +1,6 @@
-<body>
+{% extends "django_cricket_statistics/base.html" %}
+
+{% block body %}
 {% if paginator %}
 <nav>
 {% include "django_cricket_statistics/paginator.html" %}
@@ -10,4 +12,4 @@
 {% include "django_cricket_statistics/paginator.html" %}
 </nav>
 {% endif %}
-</body>
+{% endblock %}

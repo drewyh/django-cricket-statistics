@@ -17,15 +17,17 @@ class PlayerStatisticView(ListView):
     aggregates: Optional[Dict] = None
     filters: Optional[Dict] = None
     group_by: Tuple[str, ...] = tuple()
+    columns_default: {}
+    columns_extra: {}
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""
         # handle filtering from the url
         pre_filters = {
-            name: self.kwargs[name]
+            name: self.kwargs.get(name) or self.request.GET.get(name) or None
             for name in ("grade", "season")
-            if name in self.kwargs
         }
+        pre_filters = {k: v for k, v in pre_filters.items() if v is not None}
 
         aggregates = self.aggregates or {}
         filters = self.filters or {}
@@ -48,7 +50,7 @@ class PlayerStatisticView(ListView):
     def get_context_data(self, **kwargs: str) -> Dict:
         """Add extra context to be passed to the template."""
         context = super().get_context_data(**kwargs)
-        context["statistics_names"] = {"season": "Season", "player": "Player"}
+        context["statistics_names"] = {**self.columns_default, **self.columns_extra}
         context["statistics_float_fields"] = set()
 
         return context
@@ -91,9 +93,11 @@ class SeasonStatistic(PlayerStatisticView):
     """Display statistics for each season."""
 
     group_by = ("player", "season")
+    columns_default = {"player": "Player", "season": "Season"}
 
 
 class CareerStatistic(PlayerStatisticView):
     """Display all statistics for a given player."""
 
     group_by = ("player",)
+    columns_default = {"player": "Player", "season_range": "Span"}

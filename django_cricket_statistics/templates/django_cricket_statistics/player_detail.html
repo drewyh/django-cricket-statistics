@@ -1,4 +1,6 @@
-<body>
+{% extends "django_cricket_statistics/base.html" %}
+
+{% block body %}
 {% include 'django_cricket_statistics/table.html' with data=statistics_by_grade_list columns=statistics_by_grade_names columns_float=statistics_float_fields %}
 {% include 'django_cricket_statistics/table.html' with data=statistics_by_year_list columns=statistics_by_year_names columns_float=statistics_float_fields %}
-</body>
+{% endblock %}
