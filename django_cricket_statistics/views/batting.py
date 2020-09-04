@@ -30,6 +30,7 @@ class BattingAverageSeasonView(SeasonStatistic):
 
     aggregates = BATTING_AVERAGE
     ordering = "-batting_average"
+    filters = {"batting_aggregate__sum__gte": 200, "batting_innings__sum__gte": 9}
 
 
 class BattingBestInningsView(CareerStatistic):

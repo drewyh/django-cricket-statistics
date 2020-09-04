@@ -2,11 +2,11 @@
 
 from typing import Dict
 
-from django.db.models import F, Window
-from django.db.models.functions import Rank
+# from django.db.models import F, Window
+# from django.db.models.functions import Rank
 from django.views.generic import DetailView
 
-from django_cricket_statistics.models import FiveWicketInning, Hundred, Player
+from django_cricket_statistics.models import Player  # FiveWicketInning, Hundred
 from django_cricket_statistics.statistics import (
     ALL_STATISTICS,
     ALL_STATISTIC_NAMES,
@@ -26,11 +26,11 @@ class PlayerCareerView(DetailView):
         context = super().get_context_data(**kwargs)
 
         # retrieve the object primary key
-        pk = self.kwargs.get(self.pk_url_kwarg)
+        player_pk = self.kwargs.get(self.pk_url_kwarg)
 
         # add all career statistics
         career_statistics = create_queryset(
-            pre_filters={"player__pk": pk},
+            pre_filters={"player__pk": player_pk},
             group_by=("player__pk",),
             aggregates={**ALL_STATISTICS},
             select_related=("player",),
@@ -41,10 +41,10 @@ class PlayerCareerView(DetailView):
 
         # add career statistics by grade
         statistics_by_grade = create_queryset(
-           pre_filters={"player__pk": pk},
-           group_by=("player", "grade"),
-           aggregates={**SEASON_RANGE, **ALL_STATISTICS},
-           select_related=("player", "grade"),
+            pre_filters={"player__pk": player_pk},
+            group_by=("player", "grade"),
+            aggregates={**SEASON_RANGE, **ALL_STATISTICS},
+            select_related=("player", "grade"),
         )
 
         # this will evaluate the queryset immediately since we make it a list
@@ -58,10 +58,10 @@ class PlayerCareerView(DetailView):
 
         # add career statistics by year
         context["statistics_by_year_list"] = create_queryset(
-           pre_filters={"player__pk": pk},
-           group_by=("player", "season"),
-           aggregates=ALL_STATISTICS,
-           select_related=("player", "season"),
+            pre_filters={"player__pk": player_pk},
+            group_by=("player", "season"),
+            aggregates=ALL_STATISTICS,
+            select_related=("player", "season"),
         )
 
         # add display names for this table
@@ -74,7 +74,7 @@ class PlayerCareerView(DetailView):
 
         # # add hundreds
         # context["hundreds_list"] = Hundred.objects.filter(
-        #     statistic__player__pk=pk, statistic__grade__is_senior=True
+        #     statistic__player__pk=player_pk, statistic__grade__is_senior=True
         # ).annotate(
         #     rank=Window(
         #         expression=Rank(),
@@ -96,7 +96,7 @@ class PlayerCareerView(DetailView):
 
         # # add five wicket innings
         # context["five_wicket_innings_list"] = FiveWicketInning.objects.filter(
-        #     statistic__player__pk=pk, statistic__grade__is_senior=True
+        #     statistic__player__pk=player_pk, statistic__grade__is_senior=True
         # ).annotate(
         #     rank=Window(
         #         expression=Rank(),

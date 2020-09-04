@@ -1,5 +1,6 @@
 # settings for tests and migrations
 from pathlib import Path
+from typing import List
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent
@@ -67,7 +68,7 @@ TEMPLATES = [
 STATIC_ROOT = "static"
 STATIC_URL = "/static/"
 
-ALLOWED_HOSTS = []  # blank allows special cases when DEBUG=True
+ALLOWED_HOSTS: List[str] = []  # blank allows special cases when DEBUG=True
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
 MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 
