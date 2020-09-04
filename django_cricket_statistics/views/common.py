@@ -17,15 +17,14 @@ class PlayerStatisticView(ListView):
     aggregates: Optional[Dict] = None
     filters: Optional[Dict] = None
     group_by: Tuple[str, ...] = tuple()
-    columns_default: {}
-    columns_extra: {}
+    columns_default: Optional[Dict] = None
+    columns_extra: Optional[Dict] = None
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""
         # handle filtering from the url
         pre_filters = {
-            name: self.kwargs.get(name) or self.request.GET.get(name) or None
-            for name in ("grade", "season")
+            name: self.request.GET.get(name, None) for name in ("grade", "season")
         }
         pre_filters = {k: v for k, v in pre_filters.items() if v is not None}
 
@@ -50,7 +49,10 @@ class PlayerStatisticView(ListView):
     def get_context_data(self, **kwargs: str) -> Dict:
         """Add extra context to be passed to the template."""
         context = super().get_context_data(**kwargs)
-        context["statistics_names"] = {**self.columns_default, **self.columns_extra}
+        context["statistics_names"] = {
+            **(self.columns_default or {}),
+            **(self.columns_extra or {}),
+        }
         context["statistics_float_fields"] = set()
 
         return context
