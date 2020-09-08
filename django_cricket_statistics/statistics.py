@@ -127,9 +127,20 @@ FIVE_WICKET_INNINGS = {
         Subquery(FIVE_WICKET_INNINGS_SUBQUERY, output_field=IntegerField())
     )
 }
-# WICKETKEEPING_CATCHES = {}
-# WICKETKEEPING_STUMPINGS = {}
-# FIELDING_CATCHES = {}
+WICKETKEEPING_CATCHES = {"wicketkeeping_catches__sum": Sum("wicketkeeping_catches")}
+WICKETKEEPING_STUMPINGS = {
+    "wicketkeeping_stumpings__sum": Sum("wicketkeeping_stumpings")
+}
+WICKETKEEPING_DISMISSALS = {
+    **WICKETKEEPING_CATCHES,
+    **WICKETKEEPING_STUMPINGS,
+    "wicketkeeping_dismissals__sum": F("wicketkeeping_catches__sum")
+    + F("wicketkeeping_stumpings__sum"),
+}
+FIELDING_RUN_OUTS = {
+    "fielding_run_outs__sum": Sum("fielding_run_outs") + Sum("fielding_throw_outs")
+}
+FIELDING_CATCHES = {"fielding_catches__sum": Sum("fielding_catches")}
 
 # helper to get all statistics for a given queryset
 ALL_STATISTICS = {
@@ -148,9 +159,11 @@ ALL_STATISTICS = {
     **BOWLING_STRIKE_RATE,
     # **BOWLING_BEST_INNINGS,
     **FIVE_WICKET_INNINGS,
-    # **WICKETKEEPING_CATCHES,
-    # **WICKETKEEPING_STUMPINGS,
-    # **FIELDING_CATCHES,
+    **WICKETKEEPING_CATCHES,
+    **WICKETKEEPING_STUMPINGS,
+    **WICKETKEEPING_DISMISSALS,
+    **FIELDING_CATCHES,
+    **FIELDING_RUN_OUTS,
 }
 ALL_STATISTIC_NAMES = {
     "number_of_matches__sum": "Mat",
@@ -168,9 +181,11 @@ ALL_STATISTIC_NAMES = {
     "bowling_strike_rate": "SR",
     # "bowling_best_innings": "BB",
     "five_wicket_innings": "5WI",
-    # "wicketkeeping_catches__sum": "WK Ct",
-    # "wicketkeeping_stumpings__sum": "WK St",
-    # "fielding_catches__sum": "Ct",
+    "wicketkeeping_catches__sum": "WK Ct",
+    "wicketkeeping_stumpings__sum": "WK St",
+    "wicketkeeping_dismissals__sum": "WK Dis",
+    "fielding_catches__sum": "Ct",
+    "fielding_run_outs__sum": "RO",
 }
 ALL_STATISTIC_FLOATS = {
     "batting_average",
