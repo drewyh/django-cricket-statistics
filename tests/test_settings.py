@@ -49,7 +49,7 @@ ROOT_URLCONF = "django_cricket_statistics.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["templates"],
+        "DIRS": [BASE_DIR / "templates", "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -67,6 +67,9 @@ TEMPLATES = [
 
 STATIC_ROOT = "static"
 STATIC_URL = "/static/"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 ALLOWED_HOSTS: List[str] = []  # blank allows special cases when DEBUG=True
 INTERNAL_IPS = ["127.0.0.1", "localhost"]

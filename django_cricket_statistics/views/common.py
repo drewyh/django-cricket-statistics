@@ -1,11 +1,15 @@
 """Views for statistics."""
 
+from collections import namedtuple
 from typing import Dict, Optional, Tuple
 
 from django.db.models import QuerySet
 from django.views.generic import ListView
 
 from django_cricket_statistics.models import Statistic
+
+
+Table = namedtuple("Table", ["columns", "columns_float", "data", "caption"])
 
 
 class PlayerStatisticView(ListView):

@@ -11,10 +11,12 @@
     {% for item in data %}
     <tr>
     {% for attr, name in columns.items %}
-    {% with item|get:attr as value %}
+    {% with value=item|get:attr %}
     {% spaceless %}
       <td>
-        {% if attr in columns_float %}
+        {% if value is None %}
+        {{ placeholder|default:"-" }}
+        {% elif attr in columns_float %}
         {{ value|floatformat:2 }}
         {% else %}
         {{ value }}
