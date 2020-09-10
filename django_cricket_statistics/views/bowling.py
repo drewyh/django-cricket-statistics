@@ -2,6 +2,7 @@
 
 from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
 from django_cricket_statistics.statistics import (
+    BOWLING_BALLS,
     BOWLING_WICKETS,
     BOWLING_AVERAGE,
     BOWLING_STRIKE_RATE,
@@ -15,6 +16,7 @@ class BowlingWicketsCareerView(CareerStatistic):
 
     aggregates = BOWLING_WICKETS
     ordering = "-bowling_wickets__sum"
+    columns_extra = {"batting_wickets__sum": "Wickets"}
 
 
 class BowlingWicketsSeasonView(SeasonStatistic):
@@ -22,22 +24,27 @@ class BowlingWicketsSeasonView(SeasonStatistic):
 
     aggregates = BOWLING_WICKETS
     ordering = "-bowling_wickets__sum"
+    columns_extra = {"batting_wickets__sum": "Wickets"}
 
 
 class BowlingAverageCareerView(CareerStatistic):
     """Best career bowling average."""
 
-    aggregates = BOWLING_AVERAGE
+    aggregates = {**BOWLING_BALLS, **BOWLING_AVERAGE}
     ordering = "bowling_average"
+    filters = {"bowling_balls__sum__gte": 1000}
     columns_float = {"bowling_average"}
+    columns_extra = {"bowling_average": "Bowling Average"}
 
 
 class BowlingAverageSeasonView(SeasonStatistic):
     """Best season bowling average."""
 
-    aggregates = BOWLING_AVERAGE
+    aggregates = {**BOWLING_BALLS, **BOWLING_AVERAGE}
     ordering = "bowling_average"
+    filters = {"bowling_balls__sum__gte": 400}
     columns_float = {"bowling_average"}
+    columns_extra = {"bowling_average": "Bowling Average"}
 
 
 class BowlingEconomyRateCareerView(CareerStatistic):
