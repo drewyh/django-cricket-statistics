@@ -29,6 +29,7 @@ class BattingAverageCareerView(CareerStatistic):
     ordering = "-batting_average"
     filters = {"batting_innings__sum__gte": 20}
     columns_extra = {"batting_average": "Ave"}
+    columns_float = {"batting_average"}
 
 
 class BattingAverageSeasonView(SeasonStatistic):
@@ -38,6 +39,7 @@ class BattingAverageSeasonView(SeasonStatistic):
     ordering = "-batting_average"
     filters = {"batting_runs__sum__gte": 200, "batting_innings__sum__gte": 9}
     columns_extra = {"batting_average": "Ave"}
+    columns_float = {"batting_average"}
 
 
 class BattingBestInningsView(CareerStatistic):

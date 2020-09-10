@@ -29,6 +29,7 @@ class BowlingAverageCareerView(CareerStatistic):
 
     aggregates = BOWLING_AVERAGE
     ordering = "bowling_average"
+    columns_float = {"bowling_average"}
 
 
 class BowlingAverageSeasonView(SeasonStatistic):
@@ -36,6 +37,7 @@ class BowlingAverageSeasonView(SeasonStatistic):
 
     aggregates = BOWLING_AVERAGE
     ordering = "bowling_average"
+    columns_float = {"bowling_average"}
 
 
 class BowlingEconomyRateCareerView(CareerStatistic):
@@ -43,6 +45,7 @@ class BowlingEconomyRateCareerView(CareerStatistic):
 
     aggregates = BOWLING_ECONOMY_RATE
     ordering = "bowling_economy_rate"
+    columns_float = {"bowling_economy_rate"}
 
 
 class BowlingEconomyRateSeasonView(SeasonStatistic):
@@ -50,6 +53,7 @@ class BowlingEconomyRateSeasonView(SeasonStatistic):
 
     aggregates = BOWLING_ECONOMY_RATE
     ordering = "bowling_economy_rate"
+    columns_float = {"bowling_economy_rate"}
 
 
 class BowlingStrikeRateCareerView(CareerStatistic):
@@ -57,6 +61,7 @@ class BowlingStrikeRateCareerView(CareerStatistic):
 
     aggregates = BOWLING_STRIKE_RATE
     ordering = "bowling_strike_rate"
+    columns_float = {"bowling_strike_rate"}
 
 
 class BowlingStrikeRateSeasonView(SeasonStatistic):
@@ -64,6 +69,7 @@ class BowlingStrikeRateSeasonView(SeasonStatistic):
 
     aggregates = BOWLING_STRIKE_RATE
     ordering = "bowling_strike_rate"
+    columns_float = {"bowling_strike_rate"}
 
 
 class BowlingBestInningsView(CareerStatistic):

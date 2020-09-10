@@ -1,12 +1,13 @@
 """Views for statistics."""
 
 from collections import namedtuple
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Set, Tuple
 
 from django.db.models import QuerySet
 from django.views.generic import ListView
 
 from django_cricket_statistics.models import Statistic
+from django_cricket_statistics.statistics import SEASON_RANGE
 
 
 Table = namedtuple("Table", ["columns", "columns_float", "data", "caption"])
@@ -23,6 +24,7 @@ class PlayerStatisticView(ListView):
     group_by: Tuple[str, ...] = tuple()
     columns_default: Optional[Dict] = None
     columns_extra: Optional[Dict] = None
+    columns_float: Optional[Set] = None
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""
@@ -32,7 +34,7 @@ class PlayerStatisticView(ListView):
         }
         pre_filters = {k: v for k, v in pre_filters.items() if v is not None}
 
-        aggregates = self.aggregates or {}
+        aggregates = self.get_aggregates()
         filters = self.filters or {}
 
         queryset = create_queryset(
@@ -57,9 +59,13 @@ class PlayerStatisticView(ListView):
             **(self.columns_default or {}),
             **(self.columns_extra or {}),
         }
-        context["statistics_float_fields"] = set()
+        context["statistics_float_fields"] = self.columns_float or set()
 
         return context
+
+    def get_aggregates(self):
+        """Return the aggregates required."""
+        return self.aggregates or {}
 
 
 def create_queryset(
@@ -107,3 +113,8 @@ class CareerStatistic(PlayerStatisticView):
 
     group_by = ("player",)
     columns_default = {"player": "Player", "season_range": "Span"}
+
+    def get_aggregates(self):
+        """Return the aggregates required."""
+        aggregates = super().get_aggregates()
+        return {**SEASON_RANGE, **aggregates}
