@@ -25,6 +25,8 @@ BOWLING_PATTERNS = {
     "Best economy rate (season)": "bowling-economy-rate-season",
     "Best strike rate (career)": "bowling-strike-rate-career",
     "Best strike rate (season)": "bowling-strike-rate-season",
+    "Most five wicket innings (career)": "bowling-five-wicket-innings-career",
+    "Most five wicket innings (season)": "bowling-five-wicket-innings-season",
 }
 
 
