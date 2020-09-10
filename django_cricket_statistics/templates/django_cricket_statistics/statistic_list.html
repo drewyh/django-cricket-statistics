@@ -2,14 +2,10 @@
 
 {% block body %}
 {% if paginator %}
-<nav>
 {% include "django_cricket_statistics/includes/paginator.html" %}
-</nav>
 {% endif %}
 {% include 'django_cricket_statistics/includes/table.html' with data=statistic_list columns=statistics_names columns_float=statistics_float_fields %}
 {% if paginator %}
-<nav>
 {% include "django_cricket_statistics/includes/paginator.html" %}
-</nav>
 {% endif %}
 {% endblock %}
