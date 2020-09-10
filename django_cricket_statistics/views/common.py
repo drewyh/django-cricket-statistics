@@ -63,7 +63,7 @@ class PlayerStatisticView(ListView):
 
         return context
 
-    def get_aggregates(self):
+    def get_aggregates(self) -> Dict:
         """Return the aggregates required."""
         return self.aggregates or {}
 
@@ -114,7 +114,7 @@ class CareerStatistic(PlayerStatisticView):
     group_by = ("player",)
     columns_default = {"player": "Player", "season_range": "Span"}
 
-    def get_aggregates(self):
+    def get_aggregates(self) -> Dict:
         """Return the aggregates required."""
         aggregates = super().get_aggregates()
         return {**SEASON_RANGE, **aggregates}

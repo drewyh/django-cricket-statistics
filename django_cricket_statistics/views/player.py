@@ -13,7 +13,7 @@ from django_cricket_statistics.statistics import (
     ALL_STATISTIC_FLOATS,
     SEASON_RANGE,
 )
-from django_cricket_statistics.views.common import Table, create_queryset
+from django_cricket_statistics.views.common import create_queryset
 
 
 class PlayerCareerView(DetailView):
