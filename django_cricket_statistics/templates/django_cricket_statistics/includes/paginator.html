@@ -5,18 +5,16 @@
     <a href="?{% query_update request page=page_obj.previous_page_number %}">Previous</a>
   </li>
   {% else %}
-  <li class="disabled"><a>Previous</a></li>
+  <li><span>Previous</span></li>
   {% endif %}
 
-  <li class="disabled">
-    <a>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
-  </li>
+  <li><span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
 
   {% if page_obj.has_next %}
   <li>
     <a href="?{% query_update request page=page_obj.next_page_number %}">Next</a>
   </li>
   {% else %}
-  <li class="disabled"><a>Next</a></li>
+  <li><span>Next</span></li>
   {% endif %}
 </ul>
