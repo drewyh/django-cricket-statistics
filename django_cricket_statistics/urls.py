@@ -1,5 +1,5 @@
 """URLs for django_cricket_statistics."""
-from typing import Dict, List
+from typing import Callable, Dict, List
 
 from django.urls import path, include
 
@@ -30,7 +30,7 @@ BOWLING_PATTERNS = {
 }
 
 
-def _name_to_path(name):
+def _name_to_path(name: str) -> str:
     """Convert a view name to its path."""
     # only replace first and last instances so e.g. economy-rate stays complete
     output = name.replace("-", "/", 1)
@@ -38,13 +38,13 @@ def _name_to_path(name):
     return output + "/"
 
 
-def _name_to_view(name, views_module):
+def _name_to_view(name: str, views_module: object) -> Callable:
     """Convert a view name to its view class."""
     class_name = name.title().replace("-", "") + "View"
     return getattr(views_module, class_name).as_view()
 
 
-def _paths_from_patterns(patterns: Dict, views_module):
+def _paths_from_patterns(patterns: Dict, views_module: object) -> List:
     """Generate the paths from the patterns for views."""
     return [
         path(_name_to_path(name), _name_to_view(name, views_module), name=name)
