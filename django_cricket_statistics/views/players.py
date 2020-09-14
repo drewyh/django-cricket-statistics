@@ -4,7 +4,8 @@ from typing import Dict
 
 # from django.db.models import F, Window
 # from django.db.models.functions import Rank
-from django.views.generic import DetailView
+from django.db.models import QuerySet
+from django.views.generic import DetailView, ListView
 
 from django_cricket_statistics.models import (
     Grade,
@@ -26,6 +27,11 @@ class PlayerListView(ListView):
 
     model = Player
     paginate_by = 20
+    ordering = (
+        "last_name",
+        "first_name",
+        "middle_names",
+    )  # TODO: why does this need to be specified here?
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""

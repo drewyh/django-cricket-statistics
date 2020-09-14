@@ -70,7 +70,9 @@ class PlayerStatisticView(ListView):
             cls = CLASS_LOOKUP[name]
             pks = {s[name] for s in object_list}
 
-            objs = {obj.pk: obj for obj in cls.objects.filter(pk__in=pks)}
+            objs = {
+                obj.pk: obj for obj in cls.objects.filter(pk__in=pks)  # type: ignore
+            }
 
             for stat in object_list:
                 stat[name] = objs[stat[name]]
@@ -82,7 +84,7 @@ class PlayerStatisticView(ListView):
         return self.aggregates or {}
 
 
-def create_caption(filters):
+def create_caption(filters: Optional[Dict]) -> Optional[str]:
     """Create a caption based on the filters applied."""
     if not filters:
         return None
