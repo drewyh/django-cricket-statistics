@@ -9,4 +9,4 @@ from django_cricket_statistics.views.misc import *
 
 from django_cricket_statistics.views.players import *
 
-from django_cricket_statistics.views.statistic_index import *
+from django_cricket_statistics.views.indices import *

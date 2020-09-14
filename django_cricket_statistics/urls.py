@@ -61,20 +61,20 @@ urlpatterns = [
     *_paths_from_patterns(BATTING_PATTERNS, views),
     path(
         "batting/",
-        views.StatisticIndexView.as_view(links=BATTING_PATTERNS),
+        views.IndexView.as_view(links=BATTING_PATTERNS),
         name="batting-statistics",
     ),
     *_paths_from_patterns(BOWLING_PATTERNS, views),
     path(
         "bowling/",
-        views.StatisticIndexView.as_view(links=BOWLING_PATTERNS),
+        views.IndexView.as_view(links=BOWLING_PATTERNS),
         name="bowling-statistics",
     ),
     path("players/<int:pk>", views.PlayerCareerView.as_view(), name="player"),
     path("players/", views.PlayerListView.as_view(), name="player-list"),
     path(
         "",
-        views.StatisticIndexView.as_view(
+        views.IndexView.as_view(
             links=HOMEPAGE_PATTERNS,
             template_name="django_cricket_statistics/index.html",
         ),

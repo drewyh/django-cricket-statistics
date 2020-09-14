@@ -4,10 +4,10 @@ from typing import Dict
 from django.views.generic import TemplateView
 
 
-class StatisticIndexView(TemplateView):
-    """View statistic indices."""
+class IndexView(TemplateView):
+    """View indices."""
 
-    template_name = "django_cricket_statistics/link_index.html"
+    template_name = "django_cricket_statistics/links_index.html"
     links = None
 
     def get_context_data(self, **kwargs: str) -> Dict:
