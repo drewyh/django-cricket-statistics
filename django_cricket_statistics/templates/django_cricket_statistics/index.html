@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<a href="{% url 'player-list' %}">Players</a>
+<a href="{% url 'player-list-all' %}">Players</a>
 <hr>
 {% include 'django_cricket_statistics/includes/links.html' with links=links %}
 {% endblock %}

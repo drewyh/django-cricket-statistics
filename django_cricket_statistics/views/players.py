@@ -1,5 +1,6 @@
 """View for player details."""
 
+import string
 from typing import Dict
 
 # from django.db.models import F, Window
@@ -38,11 +39,12 @@ class PlayerListView(ListView):
         queryset = super().get_queryset()
 
         # handle filtering from the url
-        initial_letter = self.request.GET.get("letter", None)
+        initial_letter = self.kwargs.get("letter", None)
 
-        if initial_letter:
-            queryset = queryset.filter(last_name__istartswith=initial_letter)
+        if not initial_letter:
+            return queryset.none()
 
+        queryset = queryset.filter(last_name__istartswith=initial_letter)
         queryset = queryset.annotate(**SEASON_RANGE_PLAYER)
 
         return queryset
@@ -54,6 +56,7 @@ class PlayerListView(ListView):
             "short_name": "Player",
             "season_range": "Career",
         }
+        context["letters"] = string.ascii_uppercase
 
         return context
 

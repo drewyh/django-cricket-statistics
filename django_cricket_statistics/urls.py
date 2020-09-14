@@ -70,8 +70,9 @@ urlpatterns = [
         views.IndexView.as_view(links=BOWLING_PATTERNS),
         name="bowling-statistics",
     ),
-    path("players/<int:pk>", views.PlayerCareerView.as_view(), name="player"),
-    path("players/", views.PlayerListView.as_view(), name="player-list"),
+    path("players/<int:pk>/", views.PlayerCareerView.as_view(), name="player"),
+    path("players/<str:letter>/", views.PlayerListView.as_view(), name="player-list-letter"),
+    path("players/", views.PlayerListView.as_view(), name="player-list-all"),
     path(
         "",
         views.IndexView.as_view(
