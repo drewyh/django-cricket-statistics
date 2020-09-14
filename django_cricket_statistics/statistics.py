@@ -29,6 +29,11 @@ SEASON_RANGE = {
         F("start_year"), Value("-"), F("end_year"), output_field=CharField()
     ),
 }
+SEASON_RANGE_PLAYER = {
+    **SEASON_RANGE,
+    "start_year": Min("statistic__season__year"),
+    "end_year": Max("statistic__season__year") + 1,
+}
 
 # batting statistics
 BATTING_RUNS = {"batting_runs__sum": Sum("batting_runs")}

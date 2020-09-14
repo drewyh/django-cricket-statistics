@@ -66,6 +66,7 @@ urlpatterns = [
         name="bowling-statistics",
     ),
     path("players/<int:pk>", views.PlayerCareerView.as_view(), name="player"),
+    path("players/", views.PlayerListView.as_view(), name="player-list"),
 ]
 
 if settings.DEBUG:

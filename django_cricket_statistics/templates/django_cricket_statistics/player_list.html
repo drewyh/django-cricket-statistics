@@ -4,7 +4,8 @@
 {% if paginator %}
 {% include "django_cricket_statistics/includes/paginator.html" %}
 {% endif %}
-{% include 'django_cricket_statistics/includes/table.html' with data=statistic_list columns=statistics_names columns_float=statistics_float_fields start_rank=page_obj.start_index %}
+{{ paginator.start_index }}
+{% include 'django_cricket_statistics/includes/table.html' with data=player_list columns=player_list_names start_rank=page_obj.start_index %}
 {% if paginator %}
 {% include "django_cricket_statistics/includes/paginator.html" %}
 {% endif %}

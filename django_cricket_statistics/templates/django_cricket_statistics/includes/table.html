@@ -5,6 +5,9 @@
   {% endif %}
   <thead>
     <tr>
+      {% if start_rank %}
+      <th>#</th>
+      {% endif %}
       {% for attr, name in columns.items %}
       <th>{{ name }}</th>
       {% endfor %}
@@ -12,10 +15,13 @@
   </thead>
   <tbody>
     {% for item in data %}
+    {% spaceless %}
     <tr>
+    {% if start_rank %}
+      <td>{{ start_rank|add:forloop.counter0 }}</td>
+    {% endif %}
     {% for attr, name in columns.items %}
     {% with value=item|get:attr %}
-    {% spaceless %}
       <td>
         {% if value is None %}
         {{ placeholder|default:"-" }}
@@ -25,10 +31,10 @@
         {{ value }}
         {% endif %}
       </td>
-    {% endspaceless %}
     {% endwith %}
     {% endfor %}
     </tr>
+    {% endspaceless %}
     {% endfor %}
   </tbody>
 </table>

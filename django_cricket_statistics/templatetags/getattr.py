@@ -9,4 +9,7 @@ register = template.Library()
 @register.filter
 def get(value: Any, arg: str) -> Any:
     """Get an attribute of an object using a variable."""
-    return value.get(arg, None)
+    if hasattr(value, "get"):
+        return value.get(arg, None)
+    elif hasattr(value, arg):
+        return getattr(value, arg)
