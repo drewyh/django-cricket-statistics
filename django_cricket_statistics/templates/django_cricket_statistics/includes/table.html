@@ -1,5 +1,8 @@
 {% load getattr %}
 <table>
+  {% if caption %}
+  <caption>{{ caption }}</caption>
+  {% endif %}
   <thead>
     <tr>
       {% for attr, name in columns.items %}

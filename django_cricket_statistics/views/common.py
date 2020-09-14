@@ -7,7 +7,7 @@ from django.db.models import QuerySet
 from django.views.generic import ListView
 
 from django_cricket_statistics.models import Player, Season, Statistic
-from django_cricket_statistics.statistics import SEASON_RANGE
+from django_cricket_statistics.statistics import ALL_STATISTIC_NAMES, SEASON_RANGE
 
 
 Table = namedtuple("Table", ["columns", "columns_float", "data", "caption"])
@@ -62,6 +62,7 @@ class PlayerStatisticView(ListView):
             **(self.columns_extra or {}),
         }
         context["statistics_float_fields"] = self.columns_float or set()
+        context["caption"] = create_caption(self.filters)
 
         object_list = context["object_list"]
 
@@ -79,6 +80,22 @@ class PlayerStatisticView(ListView):
     def get_aggregates(self) -> Dict:
         """Return the aggregates required."""
         return self.aggregates or {}
+
+
+def create_caption(filters):
+    """Create a caption based on the filters applied."""
+    if not filters:
+        return None
+
+    # remove any filters which are simply removing irrelevant stats
+    filters = {k.rstrip("__gte"): v for k, v in filters.items() if k.endswith("__gte")}
+
+    if not filters:
+        return None
+
+    return "Minimum qualification: " + " ".join(
+        f"{v} {ALL_STATISTIC_NAMES[k].lower()}" for k, v in filters.items()
+    )
 
 
 def create_queryset(
