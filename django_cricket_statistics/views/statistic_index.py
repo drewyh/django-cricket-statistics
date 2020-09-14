@@ -7,7 +7,7 @@ from django.views.generic import TemplateView
 class StatisticIndexView(TemplateView):
     """View statistic indices."""
 
-    template_name = "django_cricket_statistics/statistics_index.html"
+    template_name = "django_cricket_statistics/link_index.html"
     links = None
 
     def get_context_data(self, **kwargs: str) -> Dict:

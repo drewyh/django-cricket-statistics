@@ -6,6 +6,11 @@ from django.urls import path, include
 from tests import test_settings as settings
 from django_cricket_statistics import views
 
+HOMEPAGE_PATTERNS = {
+    "Batting records": "batting-statistics",
+    "Bowling records": "bowling-statistics",
+}
+
 BATTING_PATTERNS = {
     "Most runs (career)": "batting-runs-career",
     "Most runs (season)": "batting-runs-season",
@@ -67,6 +72,14 @@ urlpatterns = [
     ),
     path("players/<int:pk>", views.PlayerCareerView.as_view(), name="player"),
     path("players/", views.PlayerListView.as_view(), name="player-list"),
+    path(
+        "",
+        views.StatisticIndexView.as_view(
+            links=HOMEPAGE_PATTERNS,
+            template_name="django_cricket_statistics/index.html",
+        ),
+        name="index",
+    ),
 ]
 
 if settings.DEBUG:
