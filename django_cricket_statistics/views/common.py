@@ -6,11 +6,13 @@ from typing import Dict, Optional, Set, Tuple
 from django.db.models import QuerySet
 from django.views.generic import ListView
 
-from django_cricket_statistics.models import Statistic
+from django_cricket_statistics.models import Player, Season, Statistic
 from django_cricket_statistics.statistics import SEASON_RANGE
 
 
 Table = namedtuple("Table", ["columns", "columns_float", "data", "caption"])
+
+CLASS_LOOKUP = {"player": Player, "season": Season}
 
 
 class PlayerStatisticView(ListView):
@@ -60,6 +62,17 @@ class PlayerStatisticView(ListView):
             **(self.columns_extra or {}),
         }
         context["statistics_float_fields"] = self.columns_float or set()
+
+        object_list = context["object_list"]
+
+        for name in self.group_by:
+            cls = CLASS_LOOKUP[name]
+            pks = {s[name] for s in object_list}
+
+            objs = {obj.pk: obj for obj in cls.objects.filter(pk__in=pks)}
+
+            for stat in object_list:
+                stat[name] = objs[stat[name]]
 
         return context
 

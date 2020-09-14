@@ -6,7 +6,11 @@ from typing import Dict
 # from django.db.models.functions import Rank
 from django.views.generic import DetailView
 
-from django_cricket_statistics.models import Player  # FiveWicketInning, Hundred
+from django_cricket_statistics.models import (
+    Grade,
+    Player,
+    Season,
+)  # FiveWicketInning, Hundred
 from django_cricket_statistics.statistics import (
     ALL_STATISTICS,
     ALL_STATISTIC_NAMES,
@@ -47,6 +51,13 @@ class PlayerCareerView(DetailView):
             select_related=("player", "grade"),
         )
 
+        # get the associated grades
+        pks = {s["grade"] for s in statistics_by_grade}
+        objs = {obj.pk: obj for obj in Grade.objects.filter(pk__in=pks)}
+
+        for stat in statistics_by_grade:
+            stat["grade"] = objs[stat["grade"]]
+
         # this will evaluate the queryset immediately since we make it a list
         context["statistics_by_grade_list"] = [
             career_statistics,
@@ -57,12 +68,21 @@ class PlayerCareerView(DetailView):
         context["statistics_by_grade_names"] = {"grade": "Grade", **ALL_STATISTIC_NAMES}
 
         # add career statistics by year
-        context["statistics_by_year_list"] = create_queryset(
+        statistics_by_year = create_queryset(
             pre_filters={"player__pk": player_pk},
             group_by=("player", "season"),
             aggregates=ALL_STATISTICS,
             select_related=("player", "season"),
-        )
+        ).order_by("-season__year")
+
+        # get the associated season
+        pks = {s["season"] for s in statistics_by_year}
+        objs = {obj.pk: obj for obj in Season.objects.filter(pk__in=pks)}
+
+        for stat in statistics_by_year:
+            stat["season"] = objs[stat["season"]]
+
+        context["statistics_by_year_list"] = statistics_by_year
 
         # add display names for this table
         context["statistics_by_year_names"] = {
