@@ -8,9 +8,7 @@
     {% else %}
     <li><span>Previous</span></li>
     {% endif %}
-
     <li><span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-
     {% if page_obj.has_next %}
     <li>
       <a href="?{% query_update request page=page_obj.next_page_number %}">Next</a>
