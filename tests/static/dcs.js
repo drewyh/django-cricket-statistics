@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  $("table").addClass("table table-striped table-bordered table-hover table-sm table-responsive");
+  $("table").addClass("table table-striped table-bordered table-hover table-sm table-responsive-md");
   $("nav.paginator ul").addClass("pagination pagination-sm justify-content-center");
   $("nav.paginator ul li").addClass("page-item");
   $("nav.paginator ul li a").addClass("page-link");
