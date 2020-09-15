@@ -40,14 +40,17 @@ class PlayerListView(ListView):
 
         # handle filtering from the url
         initial_letter = self.kwargs.get("letter", None)
+        search_term = self.request.GET.get("q", None)
 
-        if not initial_letter:
-            return queryset.none()
-
-        queryset = queryset.filter(last_name__istartswith=initial_letter)
         queryset = queryset.annotate(**SEASON_RANGE_PLAYER)
 
-        return queryset
+        if initial_letter:
+            return queryset.filter(last_name__istartswith=initial_letter)
+
+        if search_term:
+            return queryset.filter(last_name__icontains=search_term)
+
+        return queryset.none()
 
     def get_context_data(self, **kwargs: str) -> Dict:
         """Add extra context to be passed to the template."""
