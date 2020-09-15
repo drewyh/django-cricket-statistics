@@ -1,158 +1,109 @@
 """Views for bowling statistics."""
 
-from typing import Dict
-
-from django.db.models import Case, Count, F, IntegerField, OuterRef, Subquery, Sum, When
-
-from django_cricket_statistics.models import FiveWicketInning, BALLS_PER_OVER
-from django_cricket_statistics.views.common import (
-    CareerStatistic,
-    SeasonStatistic,
-    AggregatorMixinABC,
+from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
+from django_cricket_statistics.views.statistics import (
+    BOWLING_BALLS,
+    BOWLING_WICKETS,
+    BOWLING_AVERAGE,
+    BOWLING_STRIKE_RATE,
+    BOWLING_ECONOMY_RATE,
+    FIVE_WICKET_INNINGS,
 )
 
 
-class WicketsCareerView(CareerStatistic):
+class BowlingWicketsCareerView(CareerStatistic):
     """Most career bowling wickets."""
 
-    aggregates = Sum("wickets")
-    ordering = "-wickets__sum"
+    aggregates = BOWLING_WICKETS
+    ordering = "-bowling_wickets__sum"
+    columns_extra = {"batting_wickets__sum": "Wickets"}
 
 
-class WicketsSeasonView(SeasonStatistic):
+class BowlingWicketsSeasonView(SeasonStatistic):
     """Most bowling wickets in a season."""
 
-    ordering = "-wickets"
+    aggregates = BOWLING_WICKETS
+    ordering = "-bowling_wickets__sum"
+    columns_extra = {"batting_wickets__sum": "Wickets"}
 
 
-class BowlingAverageMixin(AggregatorMixinABC):
-    """Mixin for calculating bowling average."""
-
-    ordering = "bowling_average"
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        return {
-            "bowling_runs__sum": cls.aggregator("bowling_runs"),
-            "bowling_wickets__sum": cls.aggregator("bowling_wickets"),
-            "bowling_average": (
-                Case(
-                    When(
-                        bowling_wickets__sum__gt=0,
-                        then=F("bowling_runs__sum") / F("bowling_wickets__sum"),
-                    ),
-                    default=None,
-                ),
-            ),
-        }
-
-
-class BowlingAverageCareerView(BowlingAverageMixin, CareerStatistic):
+class BowlingAverageCareerView(CareerStatistic):
     """Best career bowling average."""
 
+    aggregates = {**BOWLING_BALLS, **BOWLING_AVERAGE}
+    ordering = "bowling_average"
+    filters = {"bowling_balls__sum__gte": 1000}
+    columns_float = {"bowling_average"}
+    columns_extra = {"bowling_average": "Bowling Average"}
 
-class BowlingAverageSeasonView(BowlingAverageMixin, SeasonStatistic):
+
+class BowlingAverageSeasonView(SeasonStatistic):
     """Best season bowling average."""
 
-
-class BowlingEconomyRateMixin(AggregatorMixinABC):
-    """Mixin for calculating bowling economy rate."""
-
-    ordering = "bowling_economy_rate"
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        return {
-            "bowling_balls__sum": cls.aggregator("bowling_balls"),
-            "bowling_runs__sum": cls.aggregator("bowling_runs"),
-            "bowling_economy_rate": (
-                Case(
-                    When(
-                        bowling_balls__sum__gt=0,
-                        then=F("bowling_runs__sum")
-                        / F("bowling_balls__sum")
-                        * BALLS_PER_OVER,
-                    ),
-                    default=None,
-                ),
-            ),
-        }
+    aggregates = {**BOWLING_BALLS, **BOWLING_AVERAGE}
+    ordering = "bowling_average"
+    filters = {"bowling_balls__sum__gte": 400}
+    columns_float = {"bowling_average"}
+    columns_extra = {"bowling_average": "Bowling Average"}
 
 
-class BowlingEconomyRateCareerView(BowlingEconomyRateMixin, CareerStatistic):
+class BowlingEconomyRateCareerView(CareerStatistic):
     """Best career bowling economy rate."""
 
+    aggregates = BOWLING_ECONOMY_RATE
+    ordering = "bowling_economy_rate"
+    columns_float = {"bowling_economy_rate"}
+    columns_extra = {"bowling_economy_rate": "Bowling Economy Rate"}
+    filters = {"bowling_balls__sum__gte": 1000}
 
-class BowlingEconomyRateSeasonView(BowlingEconomyRateMixin, SeasonStatistic):
+
+class BowlingEconomyRateSeasonView(SeasonStatistic):
     """Best season bowling economy rate."""
 
-
-class BowlingStrikeRateMixin(AggregatorMixinABC):
-    """Mixin for calculating bowling strike rate."""
-
-    ordering = "bowling_strike_rate"
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        return {
-            "bowling_wickets__sum": cls.aggregator("bowling_wickets"),
-            "bowling_balls__sum": cls.aggregator("bowling_balls"),
-            "bowling_strike_rate": (
-                Case(
-                    When(
-                        bowling_wickets__sum__gt=0,
-                        then=F("bowling_wickets__sum")
-                        / F("bowling_balls__sum")
-                        * BALLS_PER_OVER,
-                    ),
-                    default=None,
-                ),
-            ),
-        }
+    aggregates = BOWLING_ECONOMY_RATE
+    ordering = "bowling_economy_rate"
+    columns_float = {"bowling_economy_rate"}
+    columns_extra = {"bowling_economy_rate": "Bowling Economy Rate"}
+    filters = {"bowling_balls__sum__gte": 400}
 
 
-class BowlingStrikeRateCareerView(BowlingStrikeRateMixin, CareerStatistic):
+class BowlingStrikeRateCareerView(CareerStatistic):
     """Best career bowling strike rate."""
 
+    aggregates = BOWLING_STRIKE_RATE
+    ordering = "bowling_strike_rate"
+    columns_float = {"bowling_strike_rate"}
+    columns_extra = {"bowling_strike_rate": "Bowling Strike Rate"}
+    filters = {"bowling_balls__sum__gte": 1000}
 
-class BowlingStrikeRateSeasonView(BowlingStrikeRateMixin, SeasonStatistic):
+
+class BowlingStrikeRateSeasonView(SeasonStatistic):
     """Best season bowling strike rate."""
 
+    aggregates = BOWLING_STRIKE_RATE
+    ordering = "bowling_strike_rate"
+    columns_float = {"bowling_strike_rate"}
+    columns_extra = {"bowling_strike_rate": "Bowling Strike Rate"}
+    filters = {"bowling_balls__sum__gte": 400}
 
-class BestBowlingInningsView(CareerStatistic):
+
+class BowlingBestInningsView(CareerStatistic):
     """Best bowling innings."""
 
     ordering = ("-best_bowling_wickets", "best_bowling_runs", "grade", "-season")
 
 
-class BowlingFiveWicketInningsMixin(AggregatorMixinABC):
-    """Mixin for counting five wicket innings."""
+class BowlingFiveWicketInningsCareerView(CareerStatistic):
+    """Number of career five wicket innings."""
 
-    ordering = "-five_wicket_innings__count"
-
-    @classmethod
-    def get_aggregates(cls) -> Dict:
-        """Return the required aggregate values for annotation."""
-        five_wicket_innings = (
-            FiveWicketInning.objects.filter(statistic=OuterRef("pk"))
-            .values("statistic")
-            .annotate(five=Count("*"))
-            .values("five")
-        )
-
-        return {
-            "five_wicket_innings___count": cls.aggregator(
-                Subquery(five_wicket_innings, output_field=IntegerField())
-            )
-        }
+    aggregates = FIVE_WICKET_INNINGS
+    ordering = "-five_wicket_innings"
+    columns_extra = {"five_wicket_innings": "5WI"}
 
 
-class FiveWicketInningsCareerView(BowlingFiveWicketInningsMixin, CareerStatistic):
-    """Number of career hundreds."""
+class BowlingFiveWicketInningsSeasonView(SeasonStatistic):
+    """Number of season five wicket innings."""
 
-
-class FiveWicketInningsSeasonView(BowlingFiveWicketInningsMixin, SeasonStatistic):
-    """Number of season hundreds."""
+    aggregates = FIVE_WICKET_INNINGS
+    ordering = "-five_wicket_innings"
+    columns_extra = {"five_wicket_innings": "5WI"}

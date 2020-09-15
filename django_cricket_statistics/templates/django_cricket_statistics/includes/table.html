@@ -1,0 +1,40 @@
+{% load getattr %}
+<table>
+  {% if caption %}
+  <caption>{{ caption }}</caption>
+  {% endif %}
+  <thead>
+    <tr>
+      {% if start_rank %}
+      <th>#</th>
+      {% endif %}
+      {% for attr, name in columns.items %}
+      <th>{{ name }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in data %}
+    {% spaceless %}
+    <tr>
+    {% if start_rank %}
+      <td>{{ start_rank|add:forloop.counter0 }}</td>
+    {% endif %}
+    {% for attr, name in columns.items %}
+    {% with value=item|get:attr %}
+      <td>
+        {% if value is None %}
+        {{ placeholder|default:"-" }}
+        {% elif attr in columns_float %}
+        {{ value|floatformat:2 }}
+        {% else %}
+        {{ value }}
+        {% endif %}
+      </td>
+    {% endwith %}
+    {% endfor %}
+    </tr>
+    {% endspaceless %}
+    {% endfor %}
+  </tbody>
+</table>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block body %}
+{% if title %}
+<h1>{{ title }}</h1>
+{% endif %}
+{% if paginator %}
+{% include "django_cricket_statistics/includes/paginator.html" %}
+{% endif %}
+{% include 'django_cricket_statistics/includes/table.html' with data=statistic_list columns=statistics_names columns_float=statistics_float_fields start_rank=page_obj.start_index %}
+{% if paginator %}
+{% include "django_cricket_statistics/includes/paginator.html" %}
+{% endif %}
+{% endblock %}

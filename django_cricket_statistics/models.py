@@ -123,11 +123,11 @@ class Statistic(CricketModelBase):
     grade = models.ForeignKey(Grade, on_delete=models.PROTECT, null=False, blank=False)
 
     # season wide stats
-    number_of_matches = models.PositiveSmallIntegerField("mat")
+    matches = models.PositiveSmallIntegerField("mat")
 
     # batting stats
     batting_innings = models.PositiveSmallIntegerField("inns", default=0)
-    batting_aggregate = models.PositiveSmallIntegerField("runs", default=0)
+    batting_runs = models.PositiveSmallIntegerField("runs", default=0)
     batting_not_outs = models.PositiveSmallIntegerField("NO", default=0)
     number_batting_milestone_50 = models.PositiveSmallIntegerField("50", default=0)
     number_of_ducks = models.PositiveSmallIntegerField("ducks", default=0)

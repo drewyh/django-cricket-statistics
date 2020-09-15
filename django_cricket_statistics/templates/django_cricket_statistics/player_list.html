@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h1>Players</h1>
+{% for letter in letters %}
+<a href="{% url 'player-list-letter' letter=letter|lower %}">{{ letter }}</a>
+{% endfor %}
+<hr>
+{% if player_list %}
+{% if paginator %}
+{% include "django_cricket_statistics/includes/paginator.html" %}
+{% endif %}
+{% include 'django_cricket_statistics/includes/table.html' with data=player_list columns=player_list_names start_rank=page_obj.start_index %}
+{% if paginator %}
+{% include "django_cricket_statistics/includes/paginator.html" %}
+{% endif %}
+{% endif %}
+{% endblock %}
