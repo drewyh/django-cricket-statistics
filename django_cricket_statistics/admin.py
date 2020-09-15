@@ -1,5 +1,17 @@
+"""Admin for statistics."""
+
+from decimal import Decimal
+import re
+
+from django import forms
+from django.forms import NumberInput, TextInput
 from django.contrib import admin
-from .models import (
+from django.forms.fields import validators
+from django.db import models
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+
+from django_cricket_statistics.models import (
     Player,
     Grade,
     Season,
@@ -8,22 +20,15 @@ from .models import (
     FiveWicketInning,
     BALLS_PER_OVER,
 )
-from django import forms
-from django.forms.fields import validators
-from decimal import Decimal
-from django.db import models
-from django.forms import NumberInput, TextInput
-from django.urls import reverse
-from django.http import HttpResponseRedirect
 
 
 class StatisticInlineFormSet(forms.BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
-        super(StatisticInlineFormSet, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.queryset = self.queryset.select_related("player", "season", "grade")
 
     def add_fields(self, form, index):
-        super(StatisticInlineFormSet, self).add_fields(form, index)
+        super().add_fields(form, index)
         form.fields["bowling_overs_input"] = forms.CharField(
             label="ovs.",
             max_length=6,
@@ -64,14 +69,14 @@ class StatisticForm(forms.ModelForm):
     best_bowling_input = forms.CharField(max_length=6, required=False)
 
     def __init__(self, *args, **kwargs):
-        super(StatisticForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        m = kwargs.get("instance", None)
+        instance = kwargs.get("instance", None)
 
-        if m is not None:
-            self.initial["bowling_overs_input"] = Decimal(m.bowling_overs)
-            self.initial["best_bowling_input"] = m.bowling_best_bowling
-            self.initial["batting_high_score_input"] = m.batting_high_score
+        if instance is not None:
+            self.initial["bowling_overs_input"] = Decimal(instance.bowling_overs)
+            self.initial["best_bowling_input"] = instance.bowling_best_bowling
+            self.initial["batting_high_score_input"] = instance.batting_high_score
         else:
             self.initial["bowling_overs_input"] = Decimal(0)
             self.initial["best_bowling_input"] = "0/0"
@@ -107,37 +112,39 @@ class StatisticForm(forms.ModelForm):
         return total_balls
 
     def clean_best_bowling_input(self):
-        from re import split
-
         data = self.cleaned_data.get("best_bowling_input")
 
         # catch blank default
         if data == "":
             return data
 
-        wickets, runs = split(r"/", data, maxsplit=1)
+        wickets, runs = re.split(r"/", data, maxsplit=1)
         self.cleaned_data["best_bowling_wickets_inp"] = int(wickets)
         self.cleaned_data["best_bowling_runs_inp"] = int(runs)
 
         return data
 
     def save(self, commit=True):
-        m = super(StatisticForm, self).save(commit=commit)
+        instance = super().save(commit=commit)
 
-        m.bowling_balls = self.cleaned_data.get("balls_bowled")
+        instance.bowling_balls = self.cleaned_data.get("balls_bowled")
 
-        m.best_bowling_wickets = self.cleaned_data.get("best_bowling_wickets_inp")
-        m.best_bowling_runs = self.cleaned_data.get("best_bowling_runs_inp")
+        instance.best_bowling_wickets = self.cleaned_data.get(
+            "best_bowling_wickets_inp"
+        )
+        instance.best_bowling_runs = self.cleaned_data.get("best_bowling_runs_inp")
 
-        m.batting_high_score_runs = self.cleaned_data.get("batting_high_score_runs_inp")
-        m.batting_high_score_is_not_out = self.cleaned_data.get(
+        instance.batting_high_score_runs = self.cleaned_data.get(
+            "batting_high_score_runs_inp"
+        )
+        instance.batting_high_score_is_not_out = self.cleaned_data.get(
             "batting_high_score_is_not_out_inp"
         )
 
         if commit:
-            m.save()
+            instance.save()
 
-        return m
+        return instance
 
     class Meta:
         model = Statistic
@@ -181,7 +188,7 @@ class GeneralStatisticInline(admin.TabularInline):
     template = "admin/tabular.html"
 
     def get_queryset(self, request):
-        qs = super(GeneralStatisticInline, self).get_queryset(request)
+        qs = super().get_queryset(request)
 
         stat_id = request.GET.get("id", default=None)
 
@@ -221,22 +228,8 @@ class PlayerAdmin(admin.ModelAdmin):
         "nickname",
         "first_XI_number",
     )
-    search_fields = tuple(l for l in list_display if l != "__str__")
-    fieldsets = (
-        (
-            "Edit Details",
-            {
-                "classes": ("collapse",),
-                "fields": (
-                    "first_name",
-                    "nickname",
-                    "middle_names",
-                    "last_name",
-                    "first_XI_number",
-                ),
-            },
-        ),
-    )
+    search_fields = list_display[1:]
+    fieldsets = (("Edit Details", {"classes": ("collapse",), "fields": search_fields}),)
     inlines = (GeneralStatisticInline,)
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "20ch"})}
@@ -262,8 +255,10 @@ class StatisticAdmin(admin.ModelAdmin):
     statistic_display.short_description = "Editing"
 
     def get_model_perms(self, request):
-        perms = super(StatisticAdmin, self).get_model_perms(request)
-        return perms if request.user.is_superuser else {}
+        if not request.user.is_superuser:
+            return {}
+
+        return super().get_model_perms(request)
 
     def response_post_save_change(self, request, obj):
         """
@@ -289,8 +284,10 @@ class StatisticAdmin(admin.ModelAdmin):
 @admin.register(Grade)
 class GradeAdmin(admin.ModelAdmin):
     def get_model_perms(self, request):
-        perms = super(GradeAdmin, self).get_model_perms(request)
-        return perms if request.user.is_superuser else {}
+        if not request.user.is_superuser:
+            return {}
+
+        return super().get_model_perms(request)
 
     def has_add_permission(self, request):
         return request.user.is_superuser
@@ -305,8 +302,10 @@ class GradeAdmin(admin.ModelAdmin):
 @admin.register(Season)
 class SeasonAdmin(admin.ModelAdmin):
     def get_model_perms(self, request):
-        perms = super(SeasonAdmin, self).get_model_perms(request)
-        return perms if request.user.is_superuser else {}
+        if not request.user.is_superuser:
+            return {}
+
+        return super().get_model_perms(request)
 
     def has_add_permission(self, request):
         return request.user.is_superuser
@@ -326,8 +325,10 @@ class HundredAdmin(admin.ModelAdmin):
     ordering = ("-statistic__season__year", "statistic__grade")
 
     def get_model_perms(self, request):
-        perms = super(HundredAdmin, self).get_model_perms(request)
-        return perms if request.user.is_superuser else {}
+        if not request.user.is_superuser:
+            return {}
+
+        return super().get_model_perms(request)
 
 
 @admin.register(FiveWicketInning)
@@ -338,5 +339,7 @@ class FiveWicketInningAdmin(admin.ModelAdmin):
     ordering = ("-statistic__season__year", "statistic__grade")
 
     def get_model_perms(self, request):
-        perms = super(FiveWicketInningAdmin, self).get_model_perms(request)
-        return perms if request.user.is_superuser else {}
+        if not request.user.is_superuser:
+            return {}
+
+        return super().get_model_perms(request)
