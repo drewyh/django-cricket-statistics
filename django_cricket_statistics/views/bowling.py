@@ -53,6 +53,8 @@ class BowlingEconomyRateCareerView(CareerStatistic):
     aggregates = BOWLING_ECONOMY_RATE
     ordering = "bowling_economy_rate"
     columns_float = {"bowling_economy_rate"}
+    columns_extra = {"bowling_economy_rate": "Bowling Economy Rate"}
+    filters = {"bowling_balls__sum__gte": 1000}
 
 
 class BowlingEconomyRateSeasonView(SeasonStatistic):
@@ -61,6 +63,8 @@ class BowlingEconomyRateSeasonView(SeasonStatistic):
     aggregates = BOWLING_ECONOMY_RATE
     ordering = "bowling_economy_rate"
     columns_float = {"bowling_economy_rate"}
+    columns_extra = {"bowling_economy_rate": "Bowling Economy Rate"}
+    filters = {"bowling_balls__sum__gte": 400}
 
 
 class BowlingStrikeRateCareerView(CareerStatistic):
@@ -69,6 +73,8 @@ class BowlingStrikeRateCareerView(CareerStatistic):
     aggregates = BOWLING_STRIKE_RATE
     ordering = "bowling_strike_rate"
     columns_float = {"bowling_strike_rate"}
+    columns_extra = {"bowling_strike_rate": "Bowling Strike Rate"}
+    filters = {"bowling_balls__sum__gte": 1000}
 
 
 class BowlingStrikeRateSeasonView(SeasonStatistic):
@@ -77,6 +83,8 @@ class BowlingStrikeRateSeasonView(SeasonStatistic):
     aggregates = BOWLING_STRIKE_RATE
     ordering = "bowling_strike_rate"
     columns_float = {"bowling_strike_rate"}
+    columns_extra = {"bowling_strike_rate": "Bowling Strike Rate"}
+    filters = {"bowling_balls__sum__gte": 400}
 
 
 class BowlingBestInningsView(CareerStatistic):
@@ -89,11 +97,13 @@ class BowlingFiveWicketInningsCareerView(CareerStatistic):
     """Number of career five wicket innings."""
 
     aggregates = FIVE_WICKET_INNINGS
-    ordering = "-five_wicket_innings__count"
+    ordering = "-five_wicket_innings"
+    columns_extra = {"five_wicket_innings": "5WI"}
 
 
 class BowlingFiveWicketInningsSeasonView(SeasonStatistic):
     """Number of season five wicket innings."""
 
     aggregates = FIVE_WICKET_INNINGS
-    ordering = "-five_wicket_innings__count"
+    ordering = "-five_wicket_innings"
+    columns_extra = {"five_wicket_innings": "5WI"}

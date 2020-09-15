@@ -123,6 +123,7 @@ BOWLING_STRIKE_RATE = {
 # BOWLING_BEST_INNINGS = {}
 FIVE_WICKET_INNINGS_SUBQUERY = (
     FiveWicketInning.objects.filter(statistic=OuterRef("pk"))
+    .order_by()
     .values("statistic")
     .annotate(five=Count("*"))
     .values("five")
