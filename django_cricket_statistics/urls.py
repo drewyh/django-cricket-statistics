@@ -10,6 +10,7 @@ HOMEPAGE_PATTERNS = {
     "Games records": "games-statistics",
     "Batting records": "batting-statistics",
     "Bowling records": "bowling-statistics",
+    "All-rounder records": "allrounder-statistics",
 }
 
 MATCHES_PATTERNS = {
@@ -37,6 +38,10 @@ BOWLING_PATTERNS = {
     "Best strike rate (season)": "bowling-strike-rate-season",
     "Most five wicket innings (career)": "bowling-five-wicket-innings-career",
     "Most five wicket innings (season)": "bowling-five-wicket-innings-season",
+}
+
+ALL_ROUND_PATTERNS= {
+    "1000 runs and 100 wickets": "allrounder-1000-runs-100-wickets-career",
 }
 
 
@@ -80,6 +85,12 @@ urlpatterns = [
         "bowling/",
         views.IndexView.as_view(links=BOWLING_PATTERNS),
         name="bowling-statistics",
+    ),
+    *_paths_from_patterns(ALL_ROUND_PATTERNS, views),
+    path(
+        "allrounder/",
+        views.IndexView.as_view(links=ALL_ROUND_PATTERNS),
+        name="allrounder-statistics",
     ),
     path("players/<int:pk>/", views.PlayerCareerView.as_view(), name="player"),
     path("players/<str:letter>/", views.PlayerListView.as_view(), name="player-list-letter"),
