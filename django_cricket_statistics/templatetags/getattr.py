@@ -12,6 +12,11 @@ def get(value: Any, arg: str) -> Any:
     if hasattr(value, "get"):
         return value.get(arg, None)
 
+    # recurse for dotted attributes
+    if "." in arg:
+        first, second = arg.split(".", 1)
+        return get(get(value, first), second)
+
     if hasattr(value, arg):
         return getattr(value, arg)
 

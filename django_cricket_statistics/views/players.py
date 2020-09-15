@@ -12,7 +12,9 @@ from django_cricket_statistics.models import (
     Grade,
     Player,
     Season,
-)  # FiveWicketInning, Hundred
+    FiveWicketInning,
+    Hundred,
+)
 from django_cricket_statistics.statistics import (
     ALL_STATISTICS,
     ALL_STATISTIC_NAMES,
@@ -136,48 +138,36 @@ class PlayerCareerView(DetailView):
 
         context["statistics_float_fields"] = ALL_STATISTIC_FLOATS
 
-        # # add hundreds
-        # context["hundreds_list"] = Hundred.objects.filter(
-        #     statistic__player__pk=player_pk, statistic__grade__is_senior=True
-        # ).annotate(
-        #     rank=Window(
-        #         expression=Rank(),
-        #         order_by=[
-        #             F("runs").desc(),
-        #             F("is_not_out").desc(),
-        #             F("is_in_final").desc(),
-        #         ],
-        #     )
-        # )
+        # add hundreds
+        context["hundreds_list"] = (
+            Hundred.objects.filter(
+                statistic__player__pk=player_pk, statistic__grade__is_senior=True
+            )
+            .order_by("-runs", "-is_not_out", "-is_in_final")
+            .select_related("statistic__grade", "statistic__season")
+        )
 
-        # # add display names for this table
-        # context["hundreds_names"] = {
-        #     "rank": "#",
-        #     "season": "Season",
-        #     "grade": "Grade",
-        #     "score": "Score",
-        # }
+        # add display names for this table
+        context["hundreds_names"] = {
+            "statistic.season": "Season",
+            "statistic.grade": "Grade",
+            "score": "Score",
+        }
 
-        # # add five wicket innings
-        # context["five_wicket_innings_list"] = FiveWicketInning.objects.filter(
-        #     statistic__player__pk=player_pk, statistic__grade__is_senior=True
-        # ).annotate(
-        #     rank=Window(
-        #         expression=Rank(),
-        #         order_by=[
-        #             F("wickets").desc(),
-        #             F("runs").asc(),
-        #             F("is_in_final").desc(),
-        #         ],
-        #     )
-        # )
+        # add five wicket innings
+        context["five_wicket_innings_list"] = (
+            FiveWicketInning.objects.filter(
+                statistic__player__pk=player_pk, statistic__grade__is_senior=True
+            )
+            .order_by("-wickets", "runs", "-is_in_final")
+            .select_related("statistic__grade", "statistic__season")
+        )
 
-        # # add display names for this table
-        # context["five_wicket_innings_names"] = {
-        #     "rank": "#",
-        #     "season": "Season",
-        #     "grade": "Grade",
-        #     "figures": "Figures",
-        # }
+        # add display names for this table
+        context["five_wicket_innings_names"] = {
+            "statistic.season": "Season",
+            "statistic.grade": "Grade",
+            "figures": "Figures",
+        }
 
         return context
