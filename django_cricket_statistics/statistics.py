@@ -69,7 +69,6 @@ HUNDREDS_SUBQUERY = (
 )
 HUNDREDS = {"hundreds": Sum(Subquery(HUNDREDS_SUBQUERY, output_field=IntegerField()))}
 
-
 # bowling statistics
 BOWLING_BALLS = {"bowling_balls__sum": Sum("bowling_balls")}
 BOWLING_RUNS = {"bowling_runs__sum": Sum("bowling_runs")}
@@ -133,6 +132,8 @@ FIVE_WICKET_INNINGS = {
         Subquery(FIVE_WICKET_INNINGS_SUBQUERY, output_field=IntegerField())
     )
 }
+
+# wicketkeeping statistics
 WICKETKEEPING_CATCHES = {"fielding_catches_wk__sum": Sum("fielding_catches_wk")}
 WICKETKEEPING_STUMPINGS = {"fielding_stumpings__sum": Sum("fielding_stumpings")}
 WICKETKEEPING_DISMISSALS = {
@@ -141,6 +142,8 @@ WICKETKEEPING_DISMISSALS = {
     "wicketkeeping_dismissals__sum": F("fielding_catches_wk__sum")
     + F("fielding_stumpings__sum"),
 }
+
+# fielding statistics
 FIELDING_RUN_OUTS = {
     "fielding_run_outs__sum": Sum("fielding_run_outs") + Sum("fielding_throw_outs")
 }
