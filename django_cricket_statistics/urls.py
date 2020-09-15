@@ -1,7 +1,8 @@
 """URLs for django_cricket_statistics."""
-from typing import Callable, Dict, List
+from typing import Dict, List
 
 from django.urls import path, include
+from django.views.generic.base import View
 
 from tests import test_settings as settings
 from django_cricket_statistics import views
@@ -69,7 +70,7 @@ def _name_to_path(name: str) -> str:
     return output + "/"
 
 
-def _name_to_view(name: str, views_module: object) -> Callable:
+def _name_to_view(name: str, views_module: object) -> View:
     """Convert a view name to its view class."""
     class_name = name.title().replace("-", "") + "View"
     return getattr(views_module, class_name)
