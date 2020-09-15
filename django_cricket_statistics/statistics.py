@@ -21,7 +21,7 @@ from django.db.models.functions import Cast, Concat
 from django_cricket_statistics.models import Hundred, FiveWicketInning, BALLS_PER_OVER
 
 # overall
-MATCHES = {"number_of_matches__sum": Sum("number_of_matches")}
+MATCHES = {"matches__sum": Sum("matches")}
 SEASON_RANGE = {
     "start_year": Min("season__year"),
     "end_year": Max("season__year") + 1,

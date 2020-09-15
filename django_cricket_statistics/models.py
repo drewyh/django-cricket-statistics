@@ -123,7 +123,7 @@ class Statistic(CricketModelBase):
     grade = models.ForeignKey(Grade, on_delete=models.PROTECT, null=False, blank=False)
 
     # season wide stats
-    number_of_matches = models.PositiveSmallIntegerField("mat")
+    matches = models.PositiveSmallIntegerField("mat")
 
     # batting stats
     batting_innings = models.PositiveSmallIntegerField("inns", default=0)
