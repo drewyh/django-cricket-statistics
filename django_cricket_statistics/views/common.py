@@ -7,7 +7,7 @@ from django.db.models import QuerySet
 from django.views.generic import ListView
 
 from django_cricket_statistics.models import Player, Season, Statistic
-from django_cricket_statistics.statistics import ALL_STATISTIC_NAMES, SEASON_RANGE
+from django_cricket_statistics.views.statistics import ALL_STATISTIC_NAMES, SEASON_RANGE
 
 
 Table = namedtuple("Table", ["columns", "columns_float", "data", "caption"])

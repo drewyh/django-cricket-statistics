@@ -15,7 +15,7 @@ from django_cricket_statistics.models import (
     FiveWicketInning,
     Hundred,
 )
-from django_cricket_statistics.statistics import (
+from django_cricket_statistics.views.statistics import (
     ALL_STATISTICS,
     ALL_STATISTIC_NAMES,
     ALL_STATISTIC_FLOATS,

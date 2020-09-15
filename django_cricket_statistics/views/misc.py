@@ -3,7 +3,7 @@
 from django.db.models import Sum
 
 from django_cricket_statistics.views.common import CareerStatistic
-from django_cricket_statistics.statistics import BATTING_RUNS, BOWLING_WICKETS
+from django_cricket_statistics.views.statistics import BATTING_RUNS, BOWLING_WICKETS
 
 
 class MatchesCareerView(CareerStatistic):

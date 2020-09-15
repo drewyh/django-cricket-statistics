@@ -1,7 +1,11 @@
 """Views for batting statistics."""
 
 from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
-from django_cricket_statistics.statistics import BATTING_RUNS, BATTING_AVERAGE, HUNDREDS
+from django_cricket_statistics.views.statistics import (
+    BATTING_RUNS,
+    BATTING_AVERAGE,
+    HUNDREDS,
+)
 
 
 class BattingRunsCareerView(CareerStatistic):

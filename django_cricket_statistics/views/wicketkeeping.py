@@ -1,7 +1,7 @@
 """Views for wicketkeeping statistics."""
 
 from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
-from django_cricket_statistics.statistics import (
+from django_cricket_statistics.views.statistics import (
     WICKETKEEPING_CATCHES,
     WICKETKEEPING_STUMPINGS,
     WICKETKEEPING_DISMISSALS,

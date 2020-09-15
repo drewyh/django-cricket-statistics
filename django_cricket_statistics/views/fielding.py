@@ -1,7 +1,10 @@
 """Views for fielding statistics."""
 
 from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
-from django_cricket_statistics.statistics import FIELDING_CATCHES, FIELDING_RUN_OUTS
+from django_cricket_statistics.views.statistics import (
+    FIELDING_CATCHES,
+    FIELDING_RUN_OUTS,
+)
 
 
 class FieldingCatchesCareerView(CareerStatistic):

@@ -1,7 +1,7 @@
 """Views for bowling statistics."""
 
 from django_cricket_statistics.views.common import CareerStatistic, SeasonStatistic
-from django_cricket_statistics.statistics import (
+from django_cricket_statistics.views.statistics import (
     BOWLING_BALLS,
     BOWLING_WICKETS,
     BOWLING_AVERAGE,
