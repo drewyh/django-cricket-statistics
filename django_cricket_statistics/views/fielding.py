@@ -8,18 +8,18 @@ class FieldingCatchesCareerView(CareerStatistic):
     """Most career fielding catches."""
 
     aggregates = FIELDING_CATCHES
-    ordering = "-fielding_catches__sum"
-    filters = {"fielding_catches__sum__gt": 0}
-    columns_extra = {"fielding_catches__sum": "Ct"}
+    ordering = "-fielding_catches_non_wk__sum"
+    filters = {"fielding_catches_non_wk__sum__gt": 0}
+    columns_extra = {"fielding_catches_non_wk__sum": "Ct"}
 
 
 class FieldingCatchesSeasonView(SeasonStatistic):
     """Most season fielding catches."""
 
     aggregates = FIELDING_CATCHES
-    ordering = "-fielding_catches__sum"
-    filters = {"fielding_catches__sum__gt": 0}
-    columns_extra = {"fielding_catches__sum": "Ct"}
+    ordering = "-fielding_catches_non_wk__sum"
+    filters = {"fielding_catches_non_wk__sum__gt": 0}
+    columns_extra = {"fielding_catches_non_wk__sum": "Ct"}
 
 
 class FieldingRunOutsCareerView(CareerStatistic):

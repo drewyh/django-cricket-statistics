@@ -10,8 +10,9 @@ HOMEPAGE_PATTERNS = {
     "Games records": "games-statistics",
     "Batting records": "batting-statistics",
     "Bowling records": "bowling-statistics",
-    "Wicketkeeping records": "wicketkeeping-statistics",
     "All-rounder records": "allrounder-statistics",
+    "Wicketkeeping records": "wicketkeeping-statistics",
+    "Fielding records": "fielding-statistics",
 }
 
 MATCHES_PATTERNS = {
@@ -41,6 +42,10 @@ BOWLING_PATTERNS = {
     "Most five wicket innings (season)": "bowling-five-wicket-innings-season",
 }
 
+ALL_ROUND_PATTERNS= {
+    "1000 runs and 100 wickets": "allrounder-1000-runs-100-wickets-career",
+}
+
 WICKETKEEPING_PATTERNS = {
     "Most dismissals (career)": "wicketkeeping-dismissals-career",
     "Most dismissals (season)": "wicketkeeping-dismissals-season",
@@ -50,8 +55,11 @@ WICKETKEEPING_PATTERNS = {
     "Most stumpings (season)": "wicketkeeping-stumpings-season",
 }
 
-ALL_ROUND_PATTERNS= {
-    "1000 runs and 100 wickets": "allrounder-1000-runs-100-wickets-career",
+FIELDING_PATTERNS = {
+    "Most catches (career)": "fielding-catches-career",
+    "Most catches (season)": "fielding-catches-season",
+    "Most run outs (career)": "fielding-run-outs-career",
+    "Most run outs (season)": "fielding-run-outs-season",
 }
 
 
@@ -96,17 +104,23 @@ urlpatterns = [
         views.IndexView.as_view(links=BOWLING_PATTERNS),
         name="bowling-statistics",
     ),
+    *_paths_from_patterns(ALL_ROUND_PATTERNS, views),
+    path(
+        "allrounder/",
+        views.IndexView.as_view(links=ALL_ROUND_PATTERNS),
+        name="allrounder-statistics",
+    ),
     *_paths_from_patterns(WICKETKEEPING_PATTERNS, views),
     path(
         "wicketkeeping/",
         views.IndexView.as_view(links=WICKETKEEPING_PATTERNS),
         name="wicketkeeping-statistics",
     ),
-    *_paths_from_patterns(ALL_ROUND_PATTERNS, views),
+    *_paths_from_patterns(FIELDING_PATTERNS, views),
     path(
-        "allrounder/",
-        views.IndexView.as_view(links=ALL_ROUND_PATTERNS),
-        name="allrounder-statistics",
+        "fielding/",
+        views.IndexView.as_view(links=FIELDING_PATTERNS),
+        name="fielding-statistics",
     ),
     path("players/<int:pk>/", views.PlayerCareerView.as_view(), name="player"),
     path("players/<str:letter>/", views.PlayerListView.as_view(), name="player-list-letter"),
