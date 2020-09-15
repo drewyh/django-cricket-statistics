@@ -27,6 +27,7 @@ class PlayerStatisticView(ListView):
     columns_default: Optional[Dict] = None
     columns_extra: Optional[Dict] = None
     columns_float: Optional[Set] = None
+    title: str = ""
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""
@@ -76,6 +77,8 @@ class PlayerStatisticView(ListView):
 
             for stat in object_list:
                 stat[name] = objs[stat[name]]
+
+        context["title"] = self.title
 
         return context
 

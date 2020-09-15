@@ -7,7 +7,7 @@ from tests import test_settings as settings
 from django_cricket_statistics import views
 
 HOMEPAGE_PATTERNS = {
-    "Games records": "games-statistics",
+    "Match records": "matches-statistics",
     "Batting records": "batting-statistics",
     "Bowling records": "bowling-statistics",
     "All-rounder records": "allrounder-statistics",
@@ -40,7 +40,7 @@ BOWLING_PATTERNS = {
     "Most five wicket innings (season)": "bowling-five-wicket-innings-season",
 }
 
-ALL_ROUND_PATTERNS = {
+ALL_ROUNDER_PATTERNS = {
     "1000 runs and 100 wickets": "allrounder-1000-runs-100-wickets-career"
 }
 
@@ -72,14 +72,18 @@ def _name_to_path(name: str) -> str:
 def _name_to_view(name: str, views_module: object) -> Callable:
     """Convert a view name to its view class."""
     class_name = name.title().replace("-", "") + "View"
-    return getattr(views_module, class_name).as_view()
+    return getattr(views_module, class_name)
 
 
 def _paths_from_patterns(patterns: Dict, views_module: object) -> List:
     """Generate the paths from the patterns for views."""
     return [
-        path(_name_to_path(name), _name_to_view(name, views_module), name=name)
-        for name in patterns.values()
+        path(
+            _name_to_path(name),
+            _name_to_view(name, views_module).as_view(title=title),
+            name=name,
+        )
+        for title, name in patterns.items()
     ]
 
 
@@ -87,37 +91,41 @@ urlpatterns = [
     *_paths_from_patterns(MATCHES_PATTERNS, views),
     path(
         "matches/",
-        views.IndexView.as_view(links=MATCHES_PATTERNS),
-        name="games-statistics",
+        views.IndexView.as_view(links=MATCHES_PATTERNS, title="Match records"),
+        name="matches-statistics",
     ),
     *_paths_from_patterns(BATTING_PATTERNS, views),
     path(
         "batting/",
-        views.IndexView.as_view(links=BATTING_PATTERNS),
+        views.IndexView.as_view(links=BATTING_PATTERNS, title="Batting records"),
         name="batting-statistics",
     ),
     *_paths_from_patterns(BOWLING_PATTERNS, views),
     path(
         "bowling/",
-        views.IndexView.as_view(links=BOWLING_PATTERNS),
+        views.IndexView.as_view(links=BOWLING_PATTERNS, title="Bowling records"),
         name="bowling-statistics",
     ),
-    *_paths_from_patterns(ALL_ROUND_PATTERNS, views),
+    *_paths_from_patterns(ALL_ROUNDER_PATTERNS, views),
     path(
         "allrounder/",
-        views.IndexView.as_view(links=ALL_ROUND_PATTERNS),
+        views.IndexView.as_view(
+            links=ALL_ROUNDER_PATTERNS, title="All-rounder records"
+        ),
         name="allrounder-statistics",
     ),
     *_paths_from_patterns(WICKETKEEPING_PATTERNS, views),
     path(
         "wicketkeeping/",
-        views.IndexView.as_view(links=WICKETKEEPING_PATTERNS),
+        views.IndexView.as_view(
+            links=WICKETKEEPING_PATTERNS, title="Wicketkeeping records"
+        ),
         name="wicketkeeping-statistics",
     ),
     *_paths_from_patterns(FIELDING_PATTERNS, views),
     path(
         "fielding/",
-        views.IndexView.as_view(links=FIELDING_PATTERNS),
+        views.IndexView.as_view(links=FIELDING_PATTERNS, title="Fielding records"),
         name="fielding-statistics",
     ),
     path("players/<int:pk>/", views.PlayerCareerView.as_view(), name="player"),

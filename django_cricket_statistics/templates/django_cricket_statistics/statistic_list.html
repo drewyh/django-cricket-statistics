@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block body %}
+{% if title %}
+<h1>{{ title }}</h1>
+{% endif %}
 {% if paginator %}
 {% include "django_cricket_statistics/includes/paginator.html" %}
 {% endif %}
