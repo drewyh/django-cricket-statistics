@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block body %}
+<h1>Players</h1>
 {% for letter in letters %}
 <a href="{% url 'player-list-letter' letter=letter|lower %}">{{ letter }}</a>
 {% endfor %}

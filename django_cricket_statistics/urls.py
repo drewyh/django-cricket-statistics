@@ -7,8 +7,13 @@ from tests import test_settings as settings
 from django_cricket_statistics import views
 
 HOMEPAGE_PATTERNS = {
+    "Games records": "games-statistics",
     "Batting records": "batting-statistics",
     "Bowling records": "bowling-statistics",
+}
+
+MATCHES_PATTERNS = {
+    "Most matches (career)": "matches-career",
 }
 
 BATTING_PATTERNS = {
@@ -58,6 +63,12 @@ def _paths_from_patterns(patterns: Dict, views_module: object) -> List:
 
 
 urlpatterns = [
+    *_paths_from_patterns(MATCHES_PATTERNS, views),
+    path(
+        "matches/",
+        views.IndexView.as_view(links=MATCHES_PATTERNS),
+        name="games-statistics",
+    ),
     *_paths_from_patterns(BATTING_PATTERNS, views),
     path(
         "batting/",
