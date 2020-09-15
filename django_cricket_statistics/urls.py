@@ -15,9 +15,7 @@ HOMEPAGE_PATTERNS = {
     "Fielding records": "fielding-statistics",
 }
 
-MATCHES_PATTERNS = {
-    "Most matches (career)": "matches-career",
-}
+MATCHES_PATTERNS = {"Most matches (career)": "matches-career"}
 
 BATTING_PATTERNS = {
     "Most runs (career)": "batting-runs-career",
@@ -42,8 +40,8 @@ BOWLING_PATTERNS = {
     "Most five wicket innings (season)": "bowling-five-wicket-innings-season",
 }
 
-ALL_ROUND_PATTERNS= {
-    "1000 runs and 100 wickets": "allrounder-1000-runs-100-wickets-career",
+ALL_ROUND_PATTERNS = {
+    "1000 runs and 100 wickets": "allrounder-1000-runs-100-wickets-career"
 }
 
 WICKETKEEPING_PATTERNS = {
@@ -123,7 +121,11 @@ urlpatterns = [
         name="fielding-statistics",
     ),
     path("players/<int:pk>/", views.PlayerCareerView.as_view(), name="player"),
-    path("players/<str:letter>/", views.PlayerListView.as_view(), name="player-list-letter"),
+    path(
+        "players/<str:letter>/",
+        views.PlayerListView.as_view(),
+        name="player-list-letter",
+    ),
     path("players/", views.PlayerListView.as_view(), name="player-list-all"),
     path(
         "",
