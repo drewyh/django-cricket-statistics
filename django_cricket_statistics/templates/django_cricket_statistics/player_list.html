@@ -2,10 +2,12 @@
 
 {% block body %}
 <h1>Players</h1>
+{% if letters %}
 {% for letter in letters %}
 <a href="{% url 'player-list-letter' letter=letter|lower %}">{{ letter }}</a>
 {% endfor %}
 <hr>
+{% endif %}
 {% if player_list %}
 {% if paginator %}
 {% include "django_cricket_statistics/includes/paginator.html" %}

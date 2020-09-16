@@ -11,6 +11,7 @@ from django.views.generic import DetailView, ListView
 from django_cricket_statistics.models import (
     Grade,
     Player,
+    FirstElevenNumber,
     Season,
     FiveWicketInning,
     Hundred,
@@ -62,6 +63,40 @@ class PlayerListView(ListView):
             "season_range": "Career",
         }
         context["letters"] = string.ascii_uppercase
+
+        return context
+
+
+class PlayersFirstElevenNumberCareerView(ListView):
+    """View for list of who have played first eleven."""
+
+    model = Player
+    paginate_by = 20
+    ordering = "-first_eleven_number__pk"
+
+    def get_queryset(self) -> QuerySet:
+        """Return the queryset for the view."""
+        queryset = super().get_queryset()
+
+        queryset = (
+            queryset.select_related("first_eleven_number")
+            .annotate(**SEASON_RANGE_PLAYER)
+        )
+
+        return queryset
+
+    def get_context_data(self, **kwargs: str) -> Dict:
+        """Add extra context to be passed to the template."""
+        context = super().get_context_data(**kwargs)
+        context["player_list_names"] = {
+            "short_name": "Player",
+            "season_range": "Career",
+            "first_eleven_number": "1st XI number",
+            "first_XI_number": "1st XI number",
+        }
+        context["nos"] = FirstElevenNumber.objects.all()
+
+        print(context)
 
         return context
 

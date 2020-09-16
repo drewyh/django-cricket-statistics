@@ -14,6 +14,7 @@ def forward_eleven_number_one_to_one(apps, schema_editor):
         player.first_eleven_number = FirstElevenNumber.objects.using(db_alias).get(
             pk=player.first_XI_number
         )
+        player.save()
 
 
 def reverse_eleven_number_one_to_one(apps, schema_editor):
@@ -25,6 +26,7 @@ def reverse_eleven_number_one_to_one(apps, schema_editor):
         first_eleven_number__isnull=True
     ):
         player.first_XI_number = player.first_eleven_number.pk
+        player.save()
 
 
 class Migration(migrations.Migration):
