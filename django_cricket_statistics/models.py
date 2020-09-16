@@ -35,7 +35,7 @@ class Player(CricketModelBase):
     middle_names = models.CharField(max_length=200, blank=True)
     last_name = models.CharField(max_length=200)
 
-    first_XI_number = models.OneToOneField(
+    first_eleven_number = models.OneToOneField(
         FirstElevenNumber, on_delete=models.SET_NULL, blank=True, null=True
     )
 
