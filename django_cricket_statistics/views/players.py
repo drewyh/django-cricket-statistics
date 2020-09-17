@@ -103,6 +103,12 @@ class PlayerCareerView(DetailView):
 
     model = Player
 
+    def get_queryset(self) -> QuerySet:
+        """Return the queryset for the view."""
+        queryset = super().get_queryset()
+        queryset = queryset.select_related("first_eleven_number")
+        return queryset
+
     def get_context_data(self, **kwargs: str) -> Dict:
         """Return the required context data."""
         context = super().get_context_data(**kwargs)
