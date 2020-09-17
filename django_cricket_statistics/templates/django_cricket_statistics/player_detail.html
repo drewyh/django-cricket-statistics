@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block body %}
-<h1>{{ player }}</h1>
+<h1>{{ player }}{% if player.first_eleven_number %}<small>{{ player.first_eleven_number }}</small>{% endif %}</h1>
 <h2>Senior career</h2>
 {% include 'django_cricket_statistics/includes/table.html' with data=statistics_by_grade_list columns=statistics_by_grade_names columns_float=statistics_float_fields %}
 <h2>Season-by-season</h2>
