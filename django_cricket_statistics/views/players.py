@@ -36,6 +36,7 @@ class PlayerListView(ListView):
         "first_name",
         "middle_names",
     )  # TODO: why does this need to be specified here?
+    title = "Players"
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""
@@ -63,16 +64,19 @@ class PlayerListView(ListView):
             "season_range": "Career",
         }
         context["letters"] = string.ascii_uppercase
+        context["start_rank"] = context["page_obj"].start_index
+        context["title"] = self.title
 
         return context
 
 
-class PlayersFirstElevenNumberCareerView(ListView):
+class PlayerListFirstElevenNumberView(ListView):
     """View for list of who have played first eleven."""
 
     model = Player
     paginate_by = 20
     ordering = "-first_eleven_number__pk"
+    title = "First eleven numbers"
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view."""
@@ -90,10 +94,12 @@ class PlayersFirstElevenNumberCareerView(ListView):
         """Add extra context to be passed to the template."""
         context = super().get_context_data(**kwargs)
         context["player_list_names"] = {
+            "first_eleven_number": "#",
             "short_name": "Player",
             "season_range": "Career",
-            "first_eleven_number": "1st XI number",
         }
+        context["start_rank"] = None
+        context["title"] = self.title
 
         return context
 

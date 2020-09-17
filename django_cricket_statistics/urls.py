@@ -130,9 +130,9 @@ urlpatterns = [
         name="fielding-statistics",
     ),
     path(
-        "players/first_eleven_number/",
-        views.PlayersFirstElevenNumberCareerView.as_view(),
-        name="player-first-eleven-number",
+        "players/numbers/",
+        views.PlayerListFirstElevenNumberView.as_view(),
+        name="player-list-first-eleven-number",
     ),
     path("players/<int:pk>/", views.PlayerCareerView.as_view(), name="player"),
     path(

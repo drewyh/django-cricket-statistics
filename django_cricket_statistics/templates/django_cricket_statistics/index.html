@@ -4,4 +4,6 @@
 <a href="{% url 'player-list-all' %}">Players</a>
 <hr>
 {% include 'django_cricket_statistics/includes/links.html' with links=links %}
+<hr>
+<a href="{% url 'player-list-first-eleven-number' %}">First eleven numbers</a>
 {% endblock %}
