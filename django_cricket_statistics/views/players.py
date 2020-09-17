@@ -80,6 +80,7 @@ class PlayersFirstElevenNumberCareerView(ListView):
 
         queryset = (
             queryset.select_related("first_eleven_number")
+            .exclude(first_eleven_number__isnull=True)
             .annotate(**SEASON_RANGE_PLAYER)
         )
 
@@ -92,11 +93,7 @@ class PlayersFirstElevenNumberCareerView(ListView):
             "short_name": "Player",
             "season_range": "Career",
             "first_eleven_number": "1st XI number",
-            "first_XI_number": "1st XI number",
         }
-        context["nos"] = FirstElevenNumber.objects.all()
-
-        print(context)
 
         return context
 
