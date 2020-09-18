@@ -20,6 +20,14 @@ class CricketModelBase(models.Model):
         abstract = True
 
 
+class FirstElevenNumber(CricketModelBase):
+    """Store the first eleven number for players."""
+
+    def __str__(self) -> str:
+        """The primary key is the useful information."""
+        return str(self.pk)
+
+
 class Player(CricketModelBase):
     """Class representing a single player."""
 
@@ -28,8 +36,8 @@ class Player(CricketModelBase):
     middle_names = models.CharField(max_length=200, blank=True)
     last_name = models.CharField(max_length=200)
 
-    first_XI_number = models.PositiveSmallIntegerField(
-        unique=True, blank=True, null=True
+    first_eleven_number = models.OneToOneField(
+        FirstElevenNumber, on_delete=models.SET_NULL, blank=True, null=True
     )
 
     class Meta:  # noqa: D106
