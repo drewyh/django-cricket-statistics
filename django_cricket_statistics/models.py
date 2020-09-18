@@ -24,6 +24,7 @@ class FirstElevenNumber(CricketModelBase):
     """Store the first eleven number for players."""
 
     def __str__(self) -> str:
+        """The primary key is the useful information."""
         return str(self.pk)
 
 

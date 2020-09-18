@@ -11,7 +11,6 @@ from django.views.generic import DetailView, ListView
 from django_cricket_statistics.models import (
     Grade,
     Player,
-    FirstElevenNumber,
     Season,
     FiveWicketInning,
     Hundred,
