@@ -160,7 +160,6 @@ class GeneralStatisticInline(admin.TabularInline):
     fields = (
         "season",
         "grade",
-        "edit",
         "matches",
         "batting_innings",
         "batting_not_outs",
@@ -178,7 +177,6 @@ class GeneralStatisticInline(admin.TabularInline):
         "bowling_runs",
         "bowling_wickets",
     )
-    readonly_fields = ("edit",)
     formset = StatisticInlineFormSet
     form = StatisticForm
     formfield_overrides = {
@@ -186,7 +184,6 @@ class GeneralStatisticInline(admin.TabularInline):
             "widget": NumberInput(attrs={"style": "width:5ch"})
         }
     }
-    template = "admin/tabular.html"
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -198,16 +195,12 @@ class GeneralStatisticInline(admin.TabularInline):
 
         return qs
 
-    def edit(self, instance):
-        return "100s / 5WIs"
-
 
 class HundredInline(admin.TabularInline):
     model = Hundred
     verbose_name = None
     extra = 0
     fields = ("runs", "is_not_out", "is_in_final")
-    template = "admin/tabular.html"
 
 
 class FiveWicketInningInline(admin.TabularInline):
@@ -215,7 +208,6 @@ class FiveWicketInningInline(admin.TabularInline):
     verbose_name = None
     extra = 0
     fields = ("wickets", "runs", "is_in_final")
-    template = "admin/tabular.html"
 
 
 @admin.register(Player)
