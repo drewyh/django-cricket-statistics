@@ -16,6 +16,7 @@ from django_cricket_statistics.models import (
     Grade,
     Season,
     Statistic,
+    FirstElevenNumber,
     Hundred,
     FiveWicketInning,
     BALLS_PER_OVER,
@@ -226,7 +227,7 @@ class PlayerAdmin(admin.ModelAdmin):
         "last_name",
         "middle_names",
         "nickname",
-        "first_XI_number",
+        "first_eleven_number",
     )
     search_fields = list_display[1:]
     fieldsets = (("Edit Details", {"classes": ("collapse",), "fields": search_fields}),)
@@ -315,6 +316,19 @@ class SeasonAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
+
+
+@admin.register(FirstElevenNumber)
+class FirstElevenNumberAdmin(admin.ModelAdmin):
+    list_display = ("pk", "player")
+    actions = None
+    fields = (("player",),)
+
+    def get_model_perms(self, request):
+        if not request.user.is_superuser:
+            return {}
+
+        return super().get_model_perms(request)
 
 
 @admin.register(Hundred)
