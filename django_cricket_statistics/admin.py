@@ -322,7 +322,6 @@ class SeasonAdmin(admin.ModelAdmin):
 class FirstElevenNumberAdmin(admin.ModelAdmin):
     list_display = ("pk", "player")
     actions = None
-    fields = (("player",),)
 
     def get_model_perms(self, request):
         if not request.user.is_superuser:
