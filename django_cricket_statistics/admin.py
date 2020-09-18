@@ -23,6 +23,14 @@ from django_cricket_statistics.models import (
 )
 
 
+def global_get_model_perms(self, request):
+    """Global function to allow only superuser's permission."""
+    if not request.user.is_superuser:
+        return {}
+
+    return super().get_model_perms(request)
+
+
 class StatisticInlineFormSet(forms.BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -210,19 +218,24 @@ class FiveWicketInningInline(admin.TabularInline):
     fields = ("wickets", "runs", "is_in_final")
 
 
+PLAYER_LIST_DISPLAY = (
+    "__str__",
+    "first_name",
+    "last_name",
+    "middle_names",
+    "nickname",
+    "first_eleven_number",
+)
+
+
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
     actions = None
-    list_display = (
-        "__str__",
-        "first_name",
-        "last_name",
-        "middle_names",
-        "nickname",
-        "first_eleven_number",
+    list_display = PLAYER_LIST_DISPLAY
+    search_fields = PLAYER_LIST_DISPLAY[1:-1]
+    fieldsets = (
+        ("Edit Details", {"classes": ("collapse",), "fields": PLAYER_LIST_DISPLAY[1:]}),
     )
-    search_fields = list_display[1:]
-    fieldsets = (("Edit Details", {"classes": ("collapse",), "fields": search_fields}),)
     inlines = (GeneralStatisticInline,)
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "20ch"})}
@@ -247,11 +260,7 @@ class StatisticAdmin(admin.ModelAdmin):
 
     statistic_display.short_description = "Editing"
 
-    def get_model_perms(self, request):
-        if not request.user.is_superuser:
-            return {}
-
-        return super().get_model_perms(request)
+    get_model_perms = global_get_model_perms
 
     def response_post_save_change(self, request, obj):
         """
@@ -276,11 +285,7 @@ class StatisticAdmin(admin.ModelAdmin):
 
 @admin.register(Grade)
 class GradeAdmin(admin.ModelAdmin):
-    def get_model_perms(self, request):
-        if not request.user.is_superuser:
-            return {}
-
-        return super().get_model_perms(request)
+    get_model_perms = global_get_model_perms
 
     def has_add_permission(self, request):
         return request.user.is_superuser
@@ -294,11 +299,7 @@ class GradeAdmin(admin.ModelAdmin):
 
 @admin.register(Season)
 class SeasonAdmin(admin.ModelAdmin):
-    def get_model_perms(self, request):
-        if not request.user.is_superuser:
-            return {}
-
-        return super().get_model_perms(request)
+    get_model_perms = global_get_model_perms
 
     def has_add_permission(self, request):
         return request.user.is_superuser
@@ -315,11 +316,7 @@ class FirstElevenNumberAdmin(admin.ModelAdmin):
     list_display = ("pk", "player")
     actions = None
 
-    def get_model_perms(self, request):
-        if not request.user.is_superuser:
-            return {}
-
-        return super().get_model_perms(request)
+    get_model_perms = global_get_model_perms
 
 
 @admin.register(Hundred)
@@ -329,22 +326,16 @@ class HundredAdmin(admin.ModelAdmin):
     fields = (("statistic", "runs", "is_not_out", "is_in_final"),)
     ordering = ("-statistic__season__year", "statistic__grade")
 
-    def get_model_perms(self, request):
-        if not request.user.is_superuser:
-            return {}
-
-        return super().get_model_perms(request)
+    get_model_perms = global_get_model_perms
 
 
 @admin.register(FiveWicketInning)
 class FiveWicketInningAdmin(admin.ModelAdmin):
+    """Admin settings for five wicket innings."""
+
     list_display = ("statistic", "wickets", "runs", "is_in_final")
     actions = None
     fields = (("statistic", "wickets", "runs", "is_in_final"),)
     ordering = ("-statistic__season__year", "statistic__grade")
 
-    def get_model_perms(self, request):
-        if not request.user.is_superuser:
-            return {}
-
-        return super().get_model_perms(request)
+    get_model_perms = global_get_model_perms
