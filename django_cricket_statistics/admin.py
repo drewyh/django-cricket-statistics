@@ -235,7 +235,7 @@ class GlobalModelPermsModelAdmin(admin.ModelAdmin):
     """Class setting model permissions."""
 
     # pylint: disable=no-self-use
-    def global_get_model_perms(self, request: HttpRequest) -> Dict:
+    def get_model_perms(self, request: HttpRequest) -> Dict:
         """Global function to allow only superuser's permission."""
         if not request.user.is_superuser:
             return {}
@@ -264,7 +264,7 @@ class SuperuserModelPermsModelAdmin(GlobalModelPermsModelAdmin):
 
 
 @admin.register(Player)
-class PlayerAdmin(GlobalModelPermsModelAdmin):
+class PlayerAdmin(admin.ModelAdmin):
     """Admin settings for players."""
 
     actions = None
