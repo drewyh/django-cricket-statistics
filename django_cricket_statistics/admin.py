@@ -1,6 +1,5 @@
 """Admin for statistics."""
 
-from decimal import Decimal
 import re
 
 from django import forms
@@ -50,6 +49,10 @@ def _statistic_display(self, instance):
 class StatisticInlineFormSet(forms.BaseInlineFormSet):
     """Inline form set for statistics."""
 
+    class Meta:  # noqa: D106 # pylint: disable=missing-class-docstring
+        model = Statistic
+        fields = "__all__"
+
     def __init__(self, *args, **kwargs):
         """Select additional linked models."""
         super().__init__(*args, **kwargs)
@@ -89,10 +92,6 @@ class StatisticInlineFormSet(forms.BaseInlineFormSet):
         form.fields["batting_high_score_input"].widget.attrs.update(
             size="4ch", title="Use * for not out, e.g. 143*"
         )
-
-    class Meta:  # noqa: D106
-        model = Statistic
-        fields = "__all__"
 
 
 class StatisticForm(forms.ModelForm):
