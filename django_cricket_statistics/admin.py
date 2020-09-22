@@ -31,10 +31,20 @@ BATTING_HIGH_SCORE_RE = re.compile(r"^(?P<runs>\d+)(?P<notout>\*?)$")
 # note this is used as a method so first arg is self
 def global_get_model_perms(self, request):
     """Global function to allow only superuser's permission."""
+    del self
+
     if not request.user.is_superuser:
         return {}
 
     return super().get_model_perms(request)
+
+
+# note this is used as a method so first arg is self
+def _statistic_display(self, instance):
+    """Show player, season, and grade for statistic display."""
+    del self
+
+    return f"{instance.player.long_name} - {instance.season} - {instance.grade}"
 
 
 class StatisticInlineFormSet(forms.BaseInlineFormSet):
@@ -93,17 +103,17 @@ class StatisticForm(forms.ModelForm):
     best_bowling_input = forms.CharField(max_length=6, required=False)
 
     def __init__(self, *args, **kwargs):
-        """Initialise the model form."""
+        """Initialise the model form for compound fields."""
         super().__init__(*args, **kwargs)
 
         instance = kwargs.get("instance", None)
 
         if instance is not None:
-            self.initial["bowling_overs_input"] = Decimal(instance.bowling_overs)
+            self.initial["bowling_overs_input"] = instance.bowling_overs
             self.initial["best_bowling_input"] = instance.bowling_best_bowling
             self.initial["batting_high_score_input"] = instance.batting_high_score
         else:
-            self.initial["bowling_overs_input"] = Decimal(0)
+            self.initial["bowling_overs_input"] = "0.0"
             self.initial["best_bowling_input"] = "0/0"
             self.initial["batting_high_score_input"] = "0"
 
@@ -116,10 +126,10 @@ class StatisticForm(forms.ModelForm):
         if not match:
             return data
 
-        self.cleaned_data["batting_high_score_runs_input"] = int(match.group("runs"))
-        self.cleaned_data["batting_high_score_is_not_out_input"] = bool(
-            match.group("notout")
-        )
+        runs = int(match.group("runs"))
+        not_out = bool(match.group("notout"))
+        self.cleaned_data["batting_high_score_runs_input"] = runs
+        self.cleaned_data["batting_high_score_is_not_out_input"] = not_out
 
         return data
 
@@ -255,6 +265,7 @@ class PlayerAdmin(admin.ModelAdmin):
     }
 
     def has_delete_permission(self, request, obj=None):
+        """Only permit superusers to delete."""
         return request.user.is_superuser
 
 
@@ -268,21 +279,15 @@ class StatisticAdmin(admin.ModelAdmin):
     readonly_fields = tuple(f for fg in fields for f in fg)
     inlines = (HundredInline, FiveWicketInningInline)
 
-    def statistic_display(self, instance):
-        return "{0} - {1} - {2}".format(
-            instance.player.long_name, str(instance.season), str(instance.grade)
-        )
-
+    statistic_display = _statistic_display
     statistic_display.short_description = "Editing"
 
     get_model_perms = global_get_model_perms
 
     def response_post_save_change(self, request, obj):
-        """
-        Figure out where to redirect after the 'Save' button has been pressed
-        when editing an existing object.
+        """Determine where to redirect after the 'Save' button has been pressed.
 
-        Modify this to redirect to the parent player of the statistic
+        Modify this to redirect to the parent player of the statistic.
         """
         opts = self.model._meta
         per = Player._meta
@@ -305,12 +310,15 @@ class GradeAdmin(admin.ModelAdmin):
     get_model_perms = global_get_model_perms
 
     def has_add_permission(self, request):
+        """Only permit superusers to add."""
         return request.user.is_superuser
 
     def has_change_permission(self, request, obj=None):
+        """Only permit superusers to change."""
         return request.user.is_superuser
 
     def has_delete_permission(self, request, obj=None):
+        """Only permit superusers to delete."""
         return request.user.is_superuser
 
 
@@ -321,12 +329,15 @@ class SeasonAdmin(admin.ModelAdmin):
     get_model_perms = global_get_model_perms
 
     def has_add_permission(self, request):
+        """Only permit superusers to add."""
         return request.user.is_superuser
 
     def has_change_permission(self, request, obj=None):
+        """Only permit superusers to change."""
         return request.user.is_superuser
 
     def has_delete_permission(self, request, obj=None):
+        """Only permit superusers to delete."""
         return request.user.is_superuser
 
 
