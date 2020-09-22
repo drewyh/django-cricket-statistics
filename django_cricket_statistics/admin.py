@@ -1,14 +1,21 @@
 """Admin for statistics."""
 
 import re
+from typing import Dict, Optional, Tuple
 
-from django import forms
-from django.forms import NumberInput, TextInput
+from django.forms import (
+    BaseInlineFormSet,
+    CharField,
+    Form,
+    NumberInput,
+    ModelForm,
+    TextInput,
+)
 from django.contrib import admin
 from django.forms.fields import validators
 from django.db import models
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 
 from django_cricket_statistics.models import (
     Player,
@@ -27,43 +34,26 @@ BOWLING_BEST_BOWLING_RE = re.compile(r"^(?P<wickets>10|[0-9])\/(?P<runs>\d+)$")
 BATTING_HIGH_SCORE_RE = re.compile(r"^(?P<runs>\d+)(?P<notout>\*?)$")
 
 
-# note this is used as a method so first arg is self
-def global_get_model_perms(self, request):
-    """Global function to allow only superuser's permission."""
-    del self
-
-    if not request.user.is_superuser:
-        return {}
-
-    return super().get_model_perms(request)
-
-
-# note this is used as a method so first arg is self
-def _statistic_display(self, instance):
-    """Show player, season, and grade for statistic display."""
-    del self
-
-    return f"{instance.player.long_name} - {instance.season} - {instance.grade}"
-
-
-class StatisticInlineFormSet(forms.BaseInlineFormSet):
+class StatisticInlineFormSet(BaseInlineFormSet):
     """Inline form set for statistics."""
 
     class Meta:  # noqa: D106 # pylint: disable=missing-class-docstring
         model = Statistic
         fields = "__all__"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Tuple, **kwargs: Dict) -> None:
         """Select additional linked models."""
         super().__init__(*args, **kwargs)
-        self.queryset = self.queryset.select_related("player", "season", "grade")
+        self.queryset: models.QuerySet = self.queryset.select_related(
+            "player", "season", "grade"
+        )
 
-    def add_fields(self, form, index):
+    def add_fields(self, form: Form, index: int) -> None:
         """Add custom fields for fields with compound input."""
         super().add_fields(form, index)
 
         # bowling overs are used instead of bowling balls input
-        form.fields["bowling_overs_input"] = forms.CharField(
+        form.fields["bowling_overs_input"] = CharField(
             label="ovs.",
             max_length=6,
             required=False,
@@ -72,7 +62,7 @@ class StatisticInlineFormSet(forms.BaseInlineFormSet):
         form.fields["bowling_overs_input"].widget.attrs.update(size="4ch")
 
         # combine best bowling figures into a single input
-        form.fields["best_bowling_input"] = forms.CharField(
+        form.fields["best_bowling_input"] = CharField(
             label="BB",
             max_length=6,
             required=False,
@@ -83,7 +73,7 @@ class StatisticInlineFormSet(forms.BaseInlineFormSet):
         )
 
         # combine batting high score into a single input
-        form.fields["batting_high_score_input"] = forms.CharField(
+        form.fields["batting_high_score_input"] = CharField(
             label="HS",
             max_length=4,
             required=False,
@@ -94,14 +84,14 @@ class StatisticInlineFormSet(forms.BaseInlineFormSet):
         )
 
 
-class StatisticForm(forms.ModelForm):
+class StatisticForm(ModelForm):
     """Form for statistics."""
 
-    batting_high_score_input = forms.CharField(max_length=4, required=False)
-    bowling_overs_input = forms.CharField(max_length=4, required=False)
-    best_bowling_input = forms.CharField(max_length=6, required=False)
+    batting_high_score_input = CharField(max_length=4, required=False)
+    bowling_overs_input = CharField(max_length=4, required=False)
+    best_bowling_input = CharField(max_length=6, required=False)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: str, **kwargs: models.Model) -> None:
         """Initialise the model form for compound fields."""
         super().__init__(*args, **kwargs)
 
@@ -116,7 +106,7 @@ class StatisticForm(forms.ModelForm):
             self.initial["best_bowling_input"] = "0/0"
             self.initial["batting_high_score_input"] = "0"
 
-    def clean_batting_high_score_input(self):
+    def clean_batting_high_score_input(self) -> str:
         """Process the batting score to split it into runs and notout."""
         data = self.cleaned_data.get("batting_high_score_input")
         match = BATTING_HIGH_SCORE_RE.match(data)
@@ -132,7 +122,7 @@ class StatisticForm(forms.ModelForm):
 
         return data
 
-    def clean_bowling_overs_input(self):
+    def clean_bowling_overs_input(self) -> str:
         """Process the bowling overs to compute total balls bowled."""
         data = self.cleaned_data.get("bowling_overs_input")
         match = BOWLING_OVERS_RE.match(data)
@@ -147,7 +137,7 @@ class StatisticForm(forms.ModelForm):
 
         return data
 
-    def clean_best_bowling_input(self):
+    def clean_best_bowling_input(self) -> str:
         """Process the best bowling to determine the wickets and runs."""
         data = self.cleaned_data.get("best_bowling_input")
         match = BOWLING_BEST_BOWLING_RE.match(data)
@@ -163,7 +153,7 @@ class StatisticForm(forms.ModelForm):
 
         return data
 
-    def save(self, commit=True):
+    def save(self, commit: bool = True) -> models.Model:
         """Save the compound fields onto the instance."""
         instance = super().save(commit=commit)
 
@@ -241,8 +231,20 @@ class FiveWicketInningInline(admin.TabularInline):
     fields = ("wickets", "runs", "is_in_final")
 
 
+class GlobalModelPermsModelAdmin(admin.ModelAdmin):
+    """Class setting model permissions."""
+
+    # pylint: disable=no-self-use
+    def global_get_model_perms(self, request: HttpRequest) -> Dict:
+        """Global function to allow only superuser's permission."""
+        if not request.user.is_superuser:
+            return {}
+
+        return super().get_model_perms(request)
+
+
 @admin.register(Player)
-class PlayerAdmin(admin.ModelAdmin):
+class PlayerAdmin(GlobalModelPermsModelAdmin):
     """Admin settings for players."""
 
     actions = None
@@ -263,13 +265,15 @@ class PlayerAdmin(admin.ModelAdmin):
         models.CharField: {"widget": TextInput(attrs={"size": "20ch"})}
     }
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(
+        self, request: HttpRequest, obj: Optional[models.Model] = None
+    ) -> bool:
         """Only permit superusers to delete."""
         return request.user.is_superuser
 
 
 @admin.register(Statistic)
-class StatisticAdmin(admin.ModelAdmin):
+class StatisticAdmin(GlobalModelPermsModelAdmin):
     """Admin settings for statistics."""
 
     actions = None
@@ -278,12 +282,16 @@ class StatisticAdmin(admin.ModelAdmin):
     readonly_fields = tuple(f for fg in fields for f in fg)
     inlines = (HundredInline, FiveWicketInningInline)
 
-    statistic_display = _statistic_display
-    statistic_display.short_description = "Editing"
+    # pylint: disable=no-self-use
+    def statistic_display(self, instance: Statistic) -> str:
+        """Show player, season, and grade for statistic display."""
+        return f"{instance.player.long_name} - {instance.season} - {instance.grade}"
 
-    get_model_perms = global_get_model_perms
+    statistic_display.short_description = "Editing"  # type: ignore
 
-    def response_post_save_change(self, request, obj):
+    def response_post_save_change(
+        self, request: HttpRequest, obj: models.Model
+    ) -> HttpResponse:
         """Determine where to redirect after the 'Save' button has been pressed.
 
         Modify this to redirect to the parent player of the statistic.
@@ -303,55 +311,57 @@ class StatisticAdmin(admin.ModelAdmin):
 
 
 @admin.register(Grade)
-class GradeAdmin(admin.ModelAdmin):
+class GradeAdmin(GlobalModelPermsModelAdmin):
     """Admin settings for grades."""
 
-    get_model_perms = global_get_model_perms
-
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         """Only permit superusers to add."""
         return request.user.is_superuser
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(
+        self, request: HttpRequest, obj: Optional[models.Model] = None
+    ) -> bool:
         """Only permit superusers to change."""
         return request.user.is_superuser
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(
+        self, request: HttpRequest, obj: Optional[models.Model] = None
+    ) -> bool:
         """Only permit superusers to delete."""
         return request.user.is_superuser
 
 
 @admin.register(Season)
-class SeasonAdmin(admin.ModelAdmin):
+class SeasonAdmin(GlobalModelPermsModelAdmin):
     """Admin settings for seasons."""
 
-    get_model_perms = global_get_model_perms
-
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         """Only permit superusers to add."""
         return request.user.is_superuser
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(
+        self, request: HttpRequest, obj: Optional[models.Model] = None
+    ) -> bool:
         """Only permit superusers to change."""
         return request.user.is_superuser
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(
+        self, request: HttpRequest, obj: Optional[models.Model] = None
+    ) -> bool:
         """Only permit superusers to delete."""
         return request.user.is_superuser
 
 
 @admin.register(FirstElevenNumber)
-class FirstElevenNumberAdmin(admin.ModelAdmin):
+class FirstElevenNumberAdmin(GlobalModelPermsModelAdmin):
     """Admin settings for first eleven numbers."""
 
     list_display = ("pk", "player")
     actions = None
 
-    get_model_perms = global_get_model_perms
-
 
 @admin.register(Hundred)
-class HundredAdmin(admin.ModelAdmin):
+class HundredAdmin(GlobalModelPermsModelAdmin):
     """Admin settings for hundreds."""
 
     list_display = ("statistic", "runs", "is_not_out", "is_in_final")
@@ -359,16 +369,12 @@ class HundredAdmin(admin.ModelAdmin):
     fields = (("statistic", "runs", "is_not_out", "is_in_final"),)
     ordering = ("-statistic__season__year", "statistic__grade")
 
-    get_model_perms = global_get_model_perms
-
 
 @admin.register(FiveWicketInning)
-class FiveWicketInningAdmin(admin.ModelAdmin):
+class FiveWicketInningAdmin(GlobalModelPermsModelAdmin):
     """Admin settings for five wicket innings."""
 
     list_display = ("statistic", "wickets", "runs", "is_in_final")
     actions = None
     fields = (("statistic", "wickets", "runs", "is_in_final"),)
     ordering = ("-statistic__season__year", "statistic__grade")
-
-    get_model_perms = global_get_model_perms
