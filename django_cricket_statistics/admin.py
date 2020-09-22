@@ -86,6 +86,8 @@ class StatisticInlineFormSet(forms.BaseInlineFormSet):
 
 
 class StatisticForm(forms.ModelForm):
+    """Form for statistics."""
+
     batting_high_score_input = forms.CharField(max_length=4, required=False)
     bowling_overs_input = forms.CharField(max_length=4, required=False)
     best_bowling_input = forms.CharField(max_length=6, required=False)
@@ -172,7 +174,9 @@ class StatisticForm(forms.ModelForm):
         fields = "__all__"
 
 
-class GeneralStatisticInline(admin.TabularInline):
+class StatisticInline(admin.TabularInline):
+    """Inline for statistics."""
+
     model = Statistic
     verbose_name = None
     extra = 0
@@ -217,6 +221,8 @@ class GeneralStatisticInline(admin.TabularInline):
 
 
 class HundredInline(admin.TabularInline):
+    """Inline for hundreds."""
+
     model = Hundred
     verbose_name = None
     extra = 0
@@ -224,31 +230,32 @@ class HundredInline(admin.TabularInline):
 
 
 class FiveWicketInningInline(admin.TabularInline):
+    """Inline for five wicket innings."""
+
     model = FiveWicketInning
     verbose_name = None
     extra = 0
     fields = ("wickets", "runs", "is_in_final")
 
 
-PLAYER_LIST_DISPLAY = (
-    "__str__",
-    "first_name",
-    "last_name",
-    "middle_names",
-    "nickname",
-    "first_eleven_number",
-)
-
-
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
+    """Admin settings for players."""
+
     actions = None
-    list_display = PLAYER_LIST_DISPLAY
-    search_fields = PLAYER_LIST_DISPLAY[1:-1]
-    fieldsets = (
-        ("Edit Details", {"classes": ("collapse",), "fields": PLAYER_LIST_DISPLAY[1:]}),
+    list_display = (
+        "__str__",
+        "first_name",
+        "last_name",
+        "middle_names",
+        "nickname",
+        "first_eleven_number",
     )
-    inlines = (GeneralStatisticInline,)
+    search_fields = list_display[1:-1]
+    fieldsets = (
+        ("Edit Details", {"classes": ("collapse",), "fields": list_display[1:]}),
+    )
+    inlines = (StatisticInline,)
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "20ch"})}
     }
@@ -259,6 +266,8 @@ class PlayerAdmin(admin.ModelAdmin):
 
 @admin.register(Statistic)
 class StatisticAdmin(admin.ModelAdmin):
+    """Admin settings for statistics."""
+
     actions = None
     list_display = ("player", "season", "grade", "matches")
     fields = (("statistic_display",),)
@@ -297,6 +306,8 @@ class StatisticAdmin(admin.ModelAdmin):
 
 @admin.register(Grade)
 class GradeAdmin(admin.ModelAdmin):
+    """Admin settings for grades."""
+
     get_model_perms = global_get_model_perms
 
     def has_add_permission(self, request):
@@ -311,6 +322,8 @@ class GradeAdmin(admin.ModelAdmin):
 
 @admin.register(Season)
 class SeasonAdmin(admin.ModelAdmin):
+    """Admin settings for seasons."""
+
     get_model_perms = global_get_model_perms
 
     def has_add_permission(self, request):
@@ -325,6 +338,8 @@ class SeasonAdmin(admin.ModelAdmin):
 
 @admin.register(FirstElevenNumber)
 class FirstElevenNumberAdmin(admin.ModelAdmin):
+    """Admin settings for first eleven numbers."""
+
     list_display = ("pk", "player")
     actions = None
 
@@ -333,6 +348,8 @@ class FirstElevenNumberAdmin(admin.ModelAdmin):
 
 @admin.register(Hundred)
 class HundredAdmin(admin.ModelAdmin):
+    """Admin settings for hundreds."""
+
     list_display = ("statistic", "runs", "is_not_out", "is_in_final")
     actions = None
     fields = (("statistic", "runs", "is_not_out", "is_in_final"),)
