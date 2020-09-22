@@ -243,6 +243,26 @@ class GlobalModelPermsModelAdmin(admin.ModelAdmin):
         return super().get_model_perms(request)
 
 
+class SuperuserModelPermsModelAdmin(GlobalModelPermsModelAdmin):
+    """Class setting model permissions allowing only superuser modifications."""
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Only permit superusers to add."""
+        return request.user.is_superuser
+
+    def has_change_permission(
+        self, request: HttpRequest, obj: Optional[models.Model] = None
+    ) -> bool:
+        """Only permit superusers to change."""
+        return request.user.is_superuser
+
+    def has_delete_permission(
+        self, request: HttpRequest, obj: Optional[models.Model] = None
+    ) -> bool:
+        """Only permit superusers to delete."""
+        return request.user.is_superuser
+
+
 @admin.register(Player)
 class PlayerAdmin(GlobalModelPermsModelAdmin):
     """Admin settings for players."""
@@ -311,45 +331,13 @@ class StatisticAdmin(GlobalModelPermsModelAdmin):
 
 
 @admin.register(Grade)
-class GradeAdmin(GlobalModelPermsModelAdmin):
+class GradeAdmin(SuperuserModelPermsModelAdmin):
     """Admin settings for grades."""
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        """Only permit superusers to add."""
-        return request.user.is_superuser
-
-    def has_change_permission(
-        self, request: HttpRequest, obj: Optional[models.Model] = None
-    ) -> bool:
-        """Only permit superusers to change."""
-        return request.user.is_superuser
-
-    def has_delete_permission(
-        self, request: HttpRequest, obj: Optional[models.Model] = None
-    ) -> bool:
-        """Only permit superusers to delete."""
-        return request.user.is_superuser
 
 
 @admin.register(Season)
-class SeasonAdmin(GlobalModelPermsModelAdmin):
+class SeasonAdmin(SuperuserModelPermsModelAdmin):
     """Admin settings for seasons."""
-
-    def has_add_permission(self, request: HttpRequest) -> bool:
-        """Only permit superusers to add."""
-        return request.user.is_superuser
-
-    def has_change_permission(
-        self, request: HttpRequest, obj: Optional[models.Model] = None
-    ) -> bool:
-        """Only permit superusers to change."""
-        return request.user.is_superuser
-
-    def has_delete_permission(
-        self, request: HttpRequest, obj: Optional[models.Model] = None
-    ) -> bool:
-        """Only permit superusers to delete."""
-        return request.user.is_superuser
 
 
 @admin.register(FirstElevenNumber)
