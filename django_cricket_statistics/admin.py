@@ -23,6 +23,12 @@ from django_cricket_statistics.models import (
 )
 
 
+BOWLING_OVERS_RE = re.compile(r"^(?P<overs>\d+)(?:\.(?P<balls>\d?))?$")
+BOWLING_BEST_BOWLING_RE = re.compile(r"^(?P<wickets>10|[0-9])\/(?P<runs>\d+)$")
+BATTING_HIGH_SCORE_RE = re.compile(r"^(?P<runs>\d+)(?P<notout>\*?)$")
+
+
+# note this is used as a method so first arg is self
 def global_get_model_perms(self, request):
     """Global function to allow only superuser's permission."""
     if not request.user.is_superuser:
@@ -32,39 +38,46 @@ def global_get_model_perms(self, request):
 
 
 class StatisticInlineFormSet(forms.BaseInlineFormSet):
+    """Inline form set for statistics."""
+
     def __init__(self, *args, **kwargs):
+        """Select additional linked models."""
         super().__init__(*args, **kwargs)
         self.queryset = self.queryset.select_related("player", "season", "grade")
 
     def add_fields(self, form, index):
+        """Add custom fields for fields with compound input."""
         super().add_fields(form, index)
+
+        # bowling overs are used instead of bowling balls input
         form.fields["bowling_overs_input"] = forms.CharField(
             label="ovs.",
             max_length=6,
             required=False,
-            validators=(
-                validators.RegexValidator(regex=r"^(([1-9]\d*)|[0])((\.[0-5])?)$"),
-            ),
+            validators=(validators.RegexValidator(regex=BOWLING_OVERS_RE),),
         )
+        form.fields["bowling_overs_input"].widget.attrs.update(size="4ch")
+
+        # combine best bowling figures into a single input
         form.fields["best_bowling_input"] = forms.CharField(
             label="BB",
             max_length=6,
             required=False,
-            validators=(validators.RegexValidator(regex=r"^(10|[0-9])(/)(\d+)$"),),
+            validators=(validators.RegexValidator(regex=BOWLING_BEST_BOWLING_RE),),
         )
+        form.fields["best_bowling_input"].widget.attrs.update(
+            size="4ch", title="e.g. 4/77"
+        )
+
+        # combine batting high score into a single input
         form.fields["batting_high_score_input"] = forms.CharField(
             label="HS",
             max_length=4,
             required=False,
-            validators=(validators.RegexValidator(regex=r"^(\d+)(\*?)$"),),
+            validators=(validators.RegexValidator(regex=BATTING_HIGH_SCORE_RE),),
         )
-
-        form.fields["bowling_overs_input"].widget.attrs.update(size="4ch")
-        form.fields["best_bowling_input"].widget.attrs.update(size="4ch")
-        form.fields["batting_high_score_input"].widget.attrs.update(title="e.g. 4/77")
-        form.fields["batting_high_score_input"].widget.attrs.update(size="4ch")
         form.fields["batting_high_score_input"].widget.attrs.update(
-            title="Use * for not out, e.g. 143*"
+            size="4ch", title="Use * for not out, e.g. 143*"
         )
 
     class Meta:
@@ -93,62 +106,61 @@ class StatisticForm(forms.ModelForm):
 
     def clean_batting_high_score_input(self):
         data = self.cleaned_data.get("batting_high_score_input")
+        match = BATTING_HIGH_SCORE_RE.match(data)
 
         # catch blank default
-        if data == "":
+        if not match:
             return data
 
-        is_not_out = data.endswith("*")
-        runs = int(data.strip("*"))
-        self.cleaned_data["batting_high_score_runs_inp"] = runs
-        self.cleaned_data["batting_high_score_is_not_out_inp"] = is_not_out
+        self.cleaned_data["batting_high_score_runs_input"] = int(match.group("runs"))
+        self.cleaned_data["batting_high_score_is_not_out_input"] = bool(
+            match.group("notout")
+        )
 
         return data
 
     def clean_bowling_overs_input(self):
-        cleaned_data = self.cleaned_data
-        data = cleaned_data.get("bowling_overs_input")
+        data = self.cleaned_data.get("bowling_overs_input")
+        match = BOWLING_OVERS_RE.match(data)
 
         # catch blank default
-        if data == "":
+        if not match:
             return data
 
-        data = Decimal(cleaned_data.get("bowling_overs_input"))
-        ovs, balls = divmod(data, 1)
-        total_balls = ovs * BALLS_PER_OVER + 10 * balls
-        cleaned_data["balls_bowled"] = total_balls
+        overs = int(match.group("overs"))
+        balls = int(match.group("balls"))
+        self.cleaned_data["bowling_balls_input"] = overs * BALLS_PER_OVER + balls
 
-        return total_balls
+        return data
 
     def clean_best_bowling_input(self):
         data = self.cleaned_data.get("best_bowling_input")
+        match = BOWLING_BEST_BOWLING_RE.match(data)
 
         # catch blank default
-        if data == "":
+        if not match:
             return data
 
-        wickets, runs = re.split(r"/", data, maxsplit=1)
-        self.cleaned_data["best_bowling_wickets_inp"] = int(wickets)
-        self.cleaned_data["best_bowling_runs_inp"] = int(runs)
+        wickets = int(match.group("wickets"))
+        runs = int(match.group("runs"))
+        self.cleaned_data["best_bowling_wickets_input"] = wickets
+        self.cleaned_data["best_bowling_runs_input"] = runs
 
         return data
 
     def save(self, commit=True):
+        """Save the compound fields onto the instance."""
         instance = super().save(commit=commit)
 
-        instance.bowling_balls = self.cleaned_data.get("balls_bowled")
-
-        instance.best_bowling_wickets = self.cleaned_data.get(
-            "best_bowling_wickets_inp"
-        )
-        instance.best_bowling_runs = self.cleaned_data.get("best_bowling_runs_inp")
-
-        instance.batting_high_score_runs = self.cleaned_data.get(
-            "batting_high_score_runs_inp"
-        )
-        instance.batting_high_score_is_not_out = self.cleaned_data.get(
-            "batting_high_score_is_not_out_inp"
-        )
+        for attr in (
+            "bowling_balls",
+            "best_bowling_wickets",
+            "best_bowling_runs",
+            "batting_high_score_runs",
+            "batting_high_score_is_not_out",
+        ):
+            input_name = attr + "__input"
+            setattr(instance, input_name, self.cleaned_data.get(input_name))
 
         if commit:
             instance.save()
