@@ -80,7 +80,7 @@ class StatisticInlineFormSet(forms.BaseInlineFormSet):
             size="4ch", title="Use * for not out, e.g. 143*"
         )
 
-    class Meta:
+    class Meta:  # noqa: D106
         model = Statistic
         fields = "__all__"
 
@@ -93,6 +93,7 @@ class StatisticForm(forms.ModelForm):
     best_bowling_input = forms.CharField(max_length=6, required=False)
 
     def __init__(self, *args, **kwargs):
+        """Initialise the model form."""
         super().__init__(*args, **kwargs)
 
         instance = kwargs.get("instance", None)
@@ -107,6 +108,7 @@ class StatisticForm(forms.ModelForm):
             self.initial["batting_high_score_input"] = "0"
 
     def clean_batting_high_score_input(self):
+        """Process the batting score to split it into runs and notout."""
         data = self.cleaned_data.get("batting_high_score_input")
         match = BATTING_HIGH_SCORE_RE.match(data)
 
@@ -122,6 +124,7 @@ class StatisticForm(forms.ModelForm):
         return data
 
     def clean_bowling_overs_input(self):
+        """Process the bowling overs to compute total balls bowled."""
         data = self.cleaned_data.get("bowling_overs_input")
         match = BOWLING_OVERS_RE.match(data)
 
@@ -136,6 +139,7 @@ class StatisticForm(forms.ModelForm):
         return data
 
     def clean_best_bowling_input(self):
+        """Process the best bowling to determine the wickets and runs."""
         data = self.cleaned_data.get("best_bowling_input")
         match = BOWLING_BEST_BOWLING_RE.match(data)
 
@@ -169,7 +173,7 @@ class StatisticForm(forms.ModelForm):
 
         return instance
 
-    class Meta:
+    class Meta:  # noqa: D106
         model = Statistic
         fields = "__all__"
 
