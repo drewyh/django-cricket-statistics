@@ -209,16 +209,6 @@ class StatisticInline(admin.TabularInline):
         }
     }
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-
-        stat_id = request.GET.get("id", default=None)
-
-        if stat_id is not None:
-            qs = qs.filter(id=stat_id)
-
-        return qs
-
 
 class HundredInline(admin.TabularInline):
     """Inline for hundreds."""
