@@ -110,7 +110,7 @@ BOWLING_STRIKE_RATE = {
     "bowling_strike_rate": ExpressionWrapper(
         Case(
             When(
-                bowling_balls__sum__gt=0,
+                bowling_wickets__sum__gt=0,
                 then=Cast(F("bowling_balls__sum"), FloatField())
                 / Cast(F("bowling_wickets__sum"), FloatField()),
             ),
