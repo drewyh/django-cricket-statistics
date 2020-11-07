@@ -23,12 +23,22 @@
     {% for attr, name in columns.items %}
     {% with value=item|get:attr %}
       <td>
+        {% if attr == player_link_field %}
+        {% if player_link_field_is_self %}
+        <a href="{% url 'player' item.id %}">
+        {% else %}
+        <a href="{% url 'player' value.id %}">
+        {% endif %}
+        {% endif %}
         {% if value is None %}
         {{ placeholder|default:"-" }}
         {% elif attr in columns_float %}
         {{ value|floatformat:2 }}
         {% else %}
         {{ value }}
+        {% endif %}
+        {% if attr == player_link_field %}
+        </a>
         {% endif %}
       </td>
     {% endwith %}

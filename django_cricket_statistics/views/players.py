@@ -65,6 +65,8 @@ class PlayerListView(ListView):
         context["letters"] = string.ascii_uppercase
         context["start_rank"] = context["page_obj"].start_index
         context["title"] = self.title
+        context["player_link_field"] = "short_name"
+        context["player_link_field_is_self"] = True
 
         return context
 
@@ -99,6 +101,8 @@ class PlayerListFirstElevenNumberView(ListView):
         }
         context["start_rank"] = None
         context["title"] = self.title
+        context["player_link_field"] = "short_name"
+        context["player_link_field_is_self"] = True
 
         return context
 
