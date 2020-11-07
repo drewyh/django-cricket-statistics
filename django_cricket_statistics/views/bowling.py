@@ -16,7 +16,7 @@ class BowlingWicketsCareerView(CareerStatistic):
 
     aggregates = BOWLING_WICKETS
     ordering = "-bowling_wickets__sum"
-    columns_extra = {"batting_wickets__sum": "Wickets"}
+    columns_extra = {"bowling_wickets__sum": "Wickets"}
 
 
 class BowlingWicketsSeasonView(SeasonStatistic):
@@ -24,7 +24,7 @@ class BowlingWicketsSeasonView(SeasonStatistic):
 
     aggregates = BOWLING_WICKETS
     ordering = "-bowling_wickets__sum"
-    columns_extra = {"batting_wickets__sum": "Wickets"}
+    columns_extra = {"bowling_wickets__sum": "Wickets"}
 
 
 class BowlingAverageCareerView(CareerStatistic):
