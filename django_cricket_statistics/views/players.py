@@ -145,11 +145,10 @@ class PlayerCareerView(DetailView):
         )
 
         # get the associated grades
-        pks = {s["grade"] for s in statistics_by_grade}
-        objs = {obj.pk: obj for obj in Grade.objects.filter(pk__in=pks)}
+        grades = {grade.pk: str(grade) for grade in Grade.objects.all()}
 
         for stat in statistics_by_grade:
-            stat["grade"] = objs[stat["grade"]]
+            stat["grade"] = grades[stat["grade"]]
 
         # this will evaluate the queryset immediately since we make it a list
         context["statistics_by_grade_list"] = [
