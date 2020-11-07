@@ -173,7 +173,7 @@ ALL_STATISTICS = {
     **FIELDING_RUN_OUTS,
 }
 ALL_STATISTIC_NAMES = {
-    "number_of_matches__sum": "Mat",
+    "matches__sum": "Mat",
     "batting_innings__sum": "Inns",
     "batting_runs__sum": "Runs",
     "batting_not_outs__sum": "NO",
