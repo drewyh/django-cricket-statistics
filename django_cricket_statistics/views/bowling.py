@@ -99,6 +99,7 @@ class BowlingFiveWicketInningsCareerView(CareerStatistic):
     aggregates = FIVE_WICKET_INNINGS
     ordering = "-five_wicket_innings"
     columns_extra = {"five_wicket_innings": "5WI"}
+    filters = {"five_wicket_innings__gt": 0}
 
 
 class BowlingFiveWicketInningsSeasonView(SeasonStatistic):
@@ -107,3 +108,4 @@ class BowlingFiveWicketInningsSeasonView(SeasonStatistic):
     aggregates = FIVE_WICKET_INNINGS
     ordering = "-five_wicket_innings"
     columns_extra = {"five_wicket_innings": "5WI"}
+    filters = {"five_wicket_innings__gt": 0}
