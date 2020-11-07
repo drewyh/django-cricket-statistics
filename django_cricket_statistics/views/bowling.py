@@ -16,7 +16,7 @@ class BowlingWicketsCareerView(CareerStatistic):
 
     aggregates = BOWLING_WICKETS
     ordering = "-bowling_wickets__sum"
-    columns_extra = {"batting_wickets__sum": "Wickets"}
+    columns_extra = {"bowling_wickets__sum": "Wickets"}
 
 
 class BowlingWicketsSeasonView(SeasonStatistic):
@@ -24,7 +24,7 @@ class BowlingWicketsSeasonView(SeasonStatistic):
 
     aggregates = BOWLING_WICKETS
     ordering = "-bowling_wickets__sum"
-    columns_extra = {"batting_wickets__sum": "Wickets"}
+    columns_extra = {"bowling_wickets__sum": "Wickets"}
 
 
 class BowlingAverageCareerView(CareerStatistic):
@@ -99,6 +99,7 @@ class BowlingFiveWicketInningsCareerView(CareerStatistic):
     aggregates = FIVE_WICKET_INNINGS
     ordering = "-five_wicket_innings"
     columns_extra = {"five_wicket_innings": "5WI"}
+    filters = {"five_wicket_innings__gt": 0}
 
 
 class BowlingFiveWicketInningsSeasonView(SeasonStatistic):
@@ -107,3 +108,4 @@ class BowlingFiveWicketInningsSeasonView(SeasonStatistic):
     aggregates = FIVE_WICKET_INNINGS
     ordering = "-five_wicket_innings"
     columns_extra = {"five_wicket_innings": "5WI"}
+    filters = {"five_wicket_innings__gt": 0}

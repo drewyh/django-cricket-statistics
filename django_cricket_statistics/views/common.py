@@ -63,6 +63,8 @@ class PlayerStatisticView(ListView):
             **(self.columns_extra or {}),
         }
         context["statistics_float_fields"] = self.columns_float or set()
+        context["player_link_field"] = "player"
+        context["player_link_field_is_self"] = False
         context["caption"] = create_caption(self.filters)
 
         object_list = context["object_list"]

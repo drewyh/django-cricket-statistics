@@ -65,6 +65,8 @@ class PlayerListView(ListView):
         context["letters"] = string.ascii_uppercase
         context["start_rank"] = context["page_obj"].start_index
         context["title"] = self.title
+        context["player_link_field"] = "short_name"
+        context["player_link_field_is_self"] = True
 
         return context
 
@@ -99,6 +101,8 @@ class PlayerListFirstElevenNumberView(ListView):
         }
         context["start_rank"] = None
         context["title"] = self.title
+        context["player_link_field"] = "short_name"
+        context["player_link_field_is_self"] = True
 
         return context
 
@@ -124,8 +128,8 @@ class PlayerCareerView(DetailView):
         # add all career statistics
         career_statistics = create_queryset(
             pre_filters={"player__pk": player_pk},
-            group_by=("player__pk",),
-            aggregates={**ALL_STATISTICS},
+            group_by=("player",),
+            aggregates={**SEASON_RANGE, **ALL_STATISTICS},
             select_related=("player",),
         ).get()
 
@@ -141,11 +145,10 @@ class PlayerCareerView(DetailView):
         )
 
         # get the associated grades
-        pks = {s["grade"] for s in statistics_by_grade}
-        objs = {obj.pk: obj for obj in Grade.objects.filter(pk__in=pks)}
+        grades = {grade.pk: str(grade) for grade in Grade.objects.all()}
 
         for stat in statistics_by_grade:
-            stat["grade"] = objs[stat["grade"]]
+            stat["grade"] = grades[stat["grade"]]
 
         # this will evaluate the queryset immediately since we make it a list
         context["statistics_by_grade_list"] = [
