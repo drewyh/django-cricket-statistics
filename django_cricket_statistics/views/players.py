@@ -128,8 +128,8 @@ class PlayerCareerView(DetailView):
         # add all career statistics
         career_statistics = create_queryset(
             pre_filters={"player__pk": player_pk},
-            group_by=("player__pk",),
-            aggregates={**ALL_STATISTICS},
+            group_by=("player",),
+            aggregates={**SEASON_RANGE, **ALL_STATISTICS},
             select_related=("player",),
         ).get()
 
